@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos Procesados - Retail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --amarillo-vibrante: #FFEB3B;
+            --amarillo-oscuro: #FBC02D;
+            --gris-oscuro: #212529;
+            --gris-claro: #f8f9fa;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--gris-claro);
+            color: var(--gris-oscuro);
+        }
+        .navbar {
+            background-color: var(--amarillo-vibrante) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--gris-oscuro) !important;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, var(--amarillo-vibrante) 0%, var(--amarillo-oscuro) 100%);
+            padding: 60px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: var(--amarillo-vibrante);
+            border-bottom: none;
+            font-weight: bold;
+        }
+        .back-button {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .back-button:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            z-index: 10;
+        }
+        .filter-row {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-warehouse me-2"></i>LogiAi
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-3">Datos Procesados</h1>
+            <p class="lead">Archivo: {{ filename }}</p>
+            <p class="mb-0">{{ data|length }} registros procesados correctamente</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h4><i class="fas fa-filter me-2"></i>Filtros por Columna</h4>
+                    <a href="/file" class="btn back-button">
+                        <i class="fas fa-arrow-left me-2"></i>Volver a Gestión de Archivos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros (se llenarán con JS) -->
+        <div class="row filter-row" id="filtrosContainer">
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label for="filtroProducto" class="form-label">PRODUCTO</label>
+                <select id="filtroProducto" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label for="filtroProveedor" class="form-label">PROVEEDOR</label>
+                <select id="filtroProveedor" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-6 mb-2">
+                <label for="filtroFechaPedido" class="form-label">FECHA DE PEDIDO</label>
+                <select id="filtroFechaPedido" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-6 mb-2">
+                <label for="filtroFechaRecepcion" class="form-label">FECHA DE RECEPCIÓN</label>
+                <select id="filtroFechaRecepcion" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-6 mb-2">
+                <label for="filtroIdPedido" class="form-label">ID DEL PEDIDO</label>
+                <select id="filtroIdPedido" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabla de datos -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Datos del Archivo Procesado</h5>
+                        <span class="badge bg-primary">{{ data|length }} registros</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table table-hover table-striped" id="dataTable">
+                                <thead>
+                                    <tr>
+                                        {% for col in ['PRODUCTO', 'PROVEEDOR', 'FECHA DE PEDIDO', 'FECHA DE RECEPCIÓN', 'ID DEL PEDIDO', 'STOCK (UND)', 'VENTAS', 'NÚMERO DE PEDIDOS'] %}
+                                            {% if col in columns %}
+                                                <th>{{ col }}</th>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody">
+                                    {% for row in data %}
+                                    <tr>
+                                        {% for col in ['PRODUCTO', 'PROVEEDOR', 'FECHA DE PEDIDO', 'FECHA DE RECEPCIÓN', 'ID DEL PEDIDO', 'STOCK (UND)', 'VENTAS', 'NÚMERO DE PEDIDOS'] %}
+                                            {% if col in columns %}
+                                                <td data-column="{{ col }}">{{ row[col] }}</td>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2023 Logística Retail. Sistema de análisis de datos.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const columnasFiltro = [
+                { nombre: 'PRODUCTO', selectId: 'filtroProducto' },
+                { nombre: 'PROVEEDOR', selectId: 'filtroProveedor' },
+                { nombre: 'FECHA DE PEDIDO', selectId: 'filtroFechaPedido' },
+                { nombre: 'FECHA DE RECEPCIÓN', selectId: 'filtroFechaRecepcion' },
+                { nombre: 'ID DEL PEDIDO', selectId: 'filtroIdPedido' }
+            ];
+
+            // Mapeo de nombre de columna a índice en la tabla
+            const headers = Array.from(document.querySelectorAll('#dataTable thead th'))
+                .map(th => th.textContent.trim());
+            const indiceColumna = {};
+            columnasFiltro.forEach(filtro => {
+                const idx = headers.indexOf(filtro.nombre);
+                if (idx !== -1) {
+                    indiceColumna[filtro.nombre] = idx;
+                }
+            });
+
+            // Extraer valores únicos y llenar los selects
+            columnasFiltro.forEach(filtro => {
+                const idx = indiceColumna[filtro.nombre];
+                if (idx === undefined) return;
+
+                const valores = new Set();
+                document.querySelectorAll('#tableBody tr').forEach(tr => {
+                    const celdas = tr.querySelectorAll('td');
+                    if (celdas[idx]) {
+                        const valor = celdas[idx].textContent.trim();
+                        if (valor !== '') valores.add(valor);
+                    }
+                });
+
+                const select = document.getElementById(filtro.selectId);
+                const sortedValores = Array.from(valores).sort();
+                sortedValores.forEach(valor => {
+                    const option = document.createElement('option');
+                    option.value = valor;
+                    option.textContent = valor;
+                    select.appendChild(option);
+                });
+            });
+
+            // Aplicar filtro cuando cambie cualquier select
+            columnasFiltro.forEach(filtro => {
+                const select = document.getElementById(filtro.selectId);
+                select.addEventListener('change', aplicarFiltros);
+            });
+
+            function aplicarFiltros() {
+                const filtros = {};
+                columnasFiltro.forEach(filtro => {
+                    const valor = document.getElementById(filtro.selectId).value;
+                    if (valor) {
+                        filtros[filtro.nombre] = valor;
+                    }
+                });
+
+                const rows = document.querySelectorAll('#tableBody tr');
+                rows.forEach(row => {
+                    const celdas = row.querySelectorAll('td');
+                    let mostrar = true;
+
+                    for (const col of Object.keys(filtros)) {
+                        const idx = indiceColumna[col];
+                        if (idx !== undefined && celdas[idx]) {
+                            const valorCelda = celdas[idx].textContent.trim();
+                            if (valorCelda !== filtros[col]) {
+                                mostrar = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    row.style.display = mostrar ? '' : 'none';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
