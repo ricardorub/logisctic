@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>CRUD</h1>
+        <a href="/" class="btn btn-primary mb-3">Home</a>
+
+        <!-- Add Item Form -->
+        <h2>Add Item</h2>
+        <form action="{{ url_for('crud.add_item') }}" method="post">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <input type="text" class="form-control" name="item" placeholder="Ítem" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input type="number" class="form-control" name="numero_pedidos" placeholder="Número de pedidos" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input type="number" class="form-control" name="duracion_dias" placeholder="Duración(dias)" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input type="text" class="form-control" name="frecuencia" placeholder="Frecuencia" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input type="number" class="form-control" name="stock_unidades" placeholder="Stock (unidades)" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input type="number" step="0.01" class="form-control" name="ventas" placeholder="Ventas" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input type="number" step="0.01" class="form-control" name="cobertura" placeholder="Cobertura" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input type="date" class="form-control" name="fecha_pedido" placeholder="Fecha de pedido" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input type="date" class="form-control" name="fecha_entrega" placeholder="Fecha de entrega" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input type="number" class="form-control" name="tiempo_entrega" placeholder="Tiempo de entrega" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <input type="text" class="form-control" name="proveedor" placeholder="Proveedor" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">Add Item</button>
+        </form>
+
+        <hr>
+
+        <!-- Items Table -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Ítem</th>
+                    <th>Número de pedidos</th>
+                    <th>Duración(dias)</th>
+                    <th>Frecuencia</th>
+                    <th>Stock (unidades)</th>
+                    <th>Ventas</th>
+                    <th>Cobertura</th>
+                    <th>Fecha de pedido</th>
+                    <th>Fecha de entrega</th>
+                    <th>Tiempo de entrega</th>
+                    <th>Proveedor</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.item }}</td>
+                    <td>{{ item.numero_pedidos }}</td>
+                    <td>{{ item.duracion_dias }}</td>
+                    <td>{{ item.frecuencia }}</td>
+                    <td>{{ item.stock_unidades }}</td>
+                    <td>{{ item.ventas }}</td>
+                    <td>{{ item.cobertura }}</td>
+                    <td>{{ item.fecha_pedido }}</td>
+                    <td>{{ item.fecha_entrega }}</td>
+                    <td>{{ item.tiempo_entrega }}</td>
+                    <td>{{ item.proveedor }}</td>
+                    <td>
+                        <!-- Edit Button (triggers modal) -->
+                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal-{{ item.id }}">
+                            Edit
+                        </button>
+                        <!-- Delete Form -->
+                        <form action="{{ url_for('crud.delete_item', item_id=item.id) }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+
+                <!-- Edit Modal -->
+                <div class="modal fade" id="editModal-{{ item.id }}" tabindex="-1" aria-labelledby="editModalLabel-{{ item.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel-{{ item.id }}">Edit Item</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{ url_for('crud.update_item', item_id=item.id) }}" method="post">
+                                    <div class="mb-3">
+                                        <label for="item" class="form-label">Ítem</label>
+                                        <input type="text" class="form-control" name="item" value="{{ item.item }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="numero_pedidos" class="form-label">Número de pedidos</label>
+                                        <input type="number" class="form-control" name="numero_pedidos" value="{{ item.numero_pedidos }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="duracion_dias" class="form-label">Duración(dias)</label>
+                                        <input type="number" class="form-control" name="duracion_dias" value="{{ item.duracion_dias }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="frecuencia" class="form-label">Frecuencia</label>
+                                        <input type="text" class="form-control" name="frecuencia" value="{{ item.frecuencia }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="stock_unidades" class="form-label">Stock (unidades)</label>
+                                        <input type="number" class="form-control" name="stock_unidades" value="{{ item.stock_unidades }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="ventas" class="form-label">Ventas</label>
+                                        <input type="number" step="0.01" class="form-control" name="ventas" value="{{ item.ventas }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="cobertura" class="form-label">Cobertura</label>
+                                        <input type="number" step="0.01" class="form-control" name="cobertura" value="{{ item.cobertura }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fecha_pedido" class="form-label">Fecha de pedido</label>
+                                        <input type="date" class="form-control" name="fecha_pedido" value="{{ item.fecha_pedido.strftime('%Y-%m-%d') }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fecha_entrega" class="form-label">Fecha de entrega</label>
+                                        <input type="date" class="form-control" name="fecha_entrega" value="{{ item.fecha_entrega.strftime('%Y-%m-%d') }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="tiempo_entrega" class="form-label">Tiempo de entrega</label>
+                                        <input type="number" class="form-control" name="tiempo_entrega" value="{{ item.tiempo_entrega }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="proveedor" class="form-label">Proveedor</label>
+                                        <input type="text" class="form-control" name="proveedor" value="{{ item.proveedor }}" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save changes</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
