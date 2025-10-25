@@ -26,7 +26,7 @@ def login():
                 'first_name': user.first_name or '',
                 'last_name': user.last_name or ''
             },
-            'redirect': '/file'
+            'redirect': '/crud'
         }), 200
     else:
         return jsonify({'error': 'Credenciales inválidas'}), 401
@@ -79,7 +79,7 @@ def register():
                 'first_name': new_user.first_name,
                 'last_name': new_user.last_name
             },
-            'redirect': '/file'
+            'redirect': '/crud'
         }), 201
         
     except Exception as e:

@@ -28,3 +28,39 @@ class Contact(db.Model):
 
     def __repr__(self):
         return f'<Contact {self.name} - {self.subject}>'
+
+class CrudItem(db.Model):
+    __tablename__ = 'crud_items'
+    id = db.Column(db.Integer, primary_key=True)
+    item = db.Column(db.String(200), nullable=False)
+    numero_pedidos = db.Column(db.Integer, nullable=False)
+    duracion_dias = db.Column(db.Integer, nullable=False)
+    frecuencia = db.Column(db.String(100), nullable=False)
+    stock_unidades = db.Column(db.Integer, nullable=False)
+    ventas = db.Column(db.Float, nullable=False)
+    cobertura = db.Column(db.Float, nullable=False)
+    fecha_pedido = db.Column(db.Date, nullable=False)
+    fecha_entrega = db.Column(db.Date, nullable=False)
+    tiempo_entrega = db.Column(db.Integer, nullable=False)
+    proveedor = db.Column(db.String(200), nullable=False)
+
+    def __repr__(self):
+        return f'<CrudItem {self.item}>'
+
+class SandboxItem(db.Model):
+    __tablename__ = 'sandbox_items'
+    id = db.Column(db.Integer, primary_key=True)
+    item = db.Column(db.String(200), nullable=False)
+    numero_pedidos = db.Column(db.Integer, nullable=False)
+    duracion_dias = db.Column(db.Integer, nullable=False)
+    frecuencia = db.Column(db.String(100), nullable=False)
+    stock_unidades = db.Column(db.Integer, nullable=False)
+    ventas = db.Column(db.Float, nullable=False)
+    cobertura = db.Column(db.Float, nullable=False)
+    fecha_pedido = db.Column(db.Date, nullable=False)
+    fecha_entrega = db.Column(db.Date, nullable=False)
+    tiempo_entrega = db.Column(db.Integer, nullable=False)
+    proveedor = db.Column(db.String(200), nullable=False)
+
+    def __repr__(self):
+        return f'<SandboxItem {self.item}>'

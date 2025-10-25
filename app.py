@@ -4,6 +4,8 @@ from model.db import db
 from routes.auth import auth_bp
 from routes.predic import predic_bp
 from routes.contact import contact_bp
+from routes.crud import crud_bp
+from routes.sandbox import sandbox_bp
 
 app = Flask(__name__)
 
@@ -27,6 +29,8 @@ db.init_app(app)
 app.register_blueprint(auth_bp)
 app.register_blueprint(predic_bp) # Routes are defined from root in the blueprint
 app.register_blueprint(contact_bp)
+app.register_blueprint(crud_bp)
+app.register_blueprint(sandbox_bp)
 
 # --- Core Routes ---
 
