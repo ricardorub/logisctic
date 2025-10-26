@@ -28,3 +28,17 @@ class Contact(db.Model):
 
     def __repr__(self):
         return f'<Contact {self.name} - {self.subject}>'
+
+
+class Compra(db.Model):
+    __tablename__ = 'compras'
+    id = db.Column(db.Integer, primary_key=True)
+    proveedor = db.Column(db.String(100), nullable=False)
+    nombre_producto = db.Column(db.String(100), nullable=False)
+    precio_compra = db.Column(db.Float, nullable=False)
+    cantidad_proveedor = db.Column(db.Integer, nullable=False)
+    fecha_compra = db.Column(db.Date, nullable=False)
+    fecha_entrega = db.Column(db.Date, nullable=False)
+
+    def __repr__(self):
+        return f'<Compra {self.id}>'
