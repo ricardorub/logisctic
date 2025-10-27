@@ -6,11 +6,11 @@ from sqlalchemy import func
 import random
 
 def get_all_inventario():
-    # Subquery to sum the quantity for each product from all purchases
+    # Subquery to sum the quantity for each product from all inventory items
     sum_subquery = db.session.query(
-        Compra.nombre_producto,
-        func.sum(Compra.cantidad_proveedor).label('summed_total')
-    ).group_by(Compra.nombre_producto).subquery()
+        Inventario.nombre_producto,
+        func.sum(Inventario.cantidad_total).label('summed_total')
+    ).group_by(Inventario.nombre_producto).subquery()
 
     # Query inventory items and join with the summed quantities
     inventario_items = db.session.query(
