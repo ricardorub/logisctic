@@ -13,43 +13,43 @@
             --gris-oscuro: #212529;
             --gris-claro: #f8f9fa;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--gris-claro);
             color: var(--gris-oscuro);
         }
-        
+
         .navbar {
             background-color: var(--amarillo-vibrante) !important;
             box-shadow: 0 2px 4px rgba(0,0,0,.1);
         }
-        
+
         .navbar-brand {
             font-weight: bold;
             color: var(--gris-oscuro) !important;
         }
-        
+
         .hero-section {
             background: linear-gradient(135deg, var(--amarillo-vibrante) 0%, var(--amarillo-oscuro) 100%);
             padding: 80px 0;
             margin-bottom: 40px;
             border-radius: 0 0 20px 20px;
         }
-        
+
         .card {
             border: none;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,.1);
             margin-bottom: 20px;
         }
-        
+
         .card-header {
             background-color: var(--amarillo-vibrante);
             border-bottom: none;
             font-weight: bold;
         }
-        
+
         .btn-primary {
             background-color: var(--amarillo-vibrante);
             border-color: var(--amarillo-oscuro);
@@ -62,7 +62,7 @@
     {% include 'sidebar.html' %}
 
     <div class="main">
-    
+
 
     <!-- Main Content -->
     <div class="container">
@@ -90,7 +90,6 @@
                                         <th>Precio Compra</th>
                                         <th>Precio Venta</th>
                                         <th>Cantidad Total</th>
-                                        <th>Status</th>
                                         <th>Fecha Recepcion</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -123,12 +122,6 @@
                     <td><input type="number" class="form-control" name="precio_compra" value="${data.precio_compra || ''}" readonly></td>
                     <td><input type="number" class="form-control" name="precio_venta" value="${data.precio_venta || ''}"></td>
                     <td><input type="number" class="form-control" name="cantidad_total" value="${data.cantidad_total || ''}" readonly></td>
-                    <td>
-                        <select class="form-select status-select" name="status">
-                            <option value="esperando" ${data.status === 'esperando' ? 'selected' : ''}>Esperando</option>
-                            <option value="recibido" ${data.status === 'recibido' ? 'selected' : ''}>Recibido</option>
-                        </select>
-                    </td>
                     <td><input type="date" class="form-control" name="fecha_recepcion" value="${data.fecha_recepcion || ''}" readonly></td>
                     <td>
                         <button class="btn btn-sm btn-primary edit-btn"><i class="fas fa-edit"></i></button>
@@ -140,7 +133,6 @@
                 const compraIdSelect = newRow.querySelector('.compra-id-select');
                 const productoSelect = newRow.querySelector('.producto-select');
                 const precioCompraInput = newRow.querySelector('[name="precio_compra"]');
-                const statusSelect = newRow.querySelector('.status-select');
                 const fechaRecepcionInput = newRow.querySelector('[name="fecha_recepcion"]');
 
                 // Populate compra_id dropdown
@@ -158,7 +150,7 @@
                             compraIdSelect.appendChild(option);
                         });
                     });
-                
+
                 // Populate producto dropdown
                 fetch('/api/productos')
                     .then(response => response.json())
@@ -174,18 +166,7 @@
                             productoSelect.appendChild(option);
                         });
                     });
-                
-                // Handle status change
-                statusSelect.addEventListener('change', () => {
-                    if (statusSelect.value === 'recibido') {
-                        if(!data.fecha_recepcion){
-                           fechaRecepcionInput.value = new Date().toISOString().split('T')[0];
-                        }
-                    } else {
-                        fechaRecepcionInput.value = '';
-                    }
-                });
-                
+
                 // Handle Compra ID change
                 compraIdSelect.addEventListener('change', () => {
                     const selectedCompraId = compraIdSelect.value;
@@ -193,7 +174,6 @@
                         fetch(`/api/compras/details/${selectedCompraId}`)
                             .then(response => response.json())
                             .then(details => {
-                                // Find the option in the productoSelect and set it
                                 for (let i = 0; i < productoSelect.options.length; i++) {
                                     if (productoSelect.options[i].value === details.nombre_producto) {
                                         productoSelect.selectedIndex = i;
@@ -204,16 +184,6 @@
                             });
                     }
                 });
-                
-                // Initial state
-                if (data.status === 'recibido') {
-                    compraIdSelect.disabled = false;
-                    productoSelect.disabled = true;
-                } else {
-                    compraIdSelect.disabled = true;
-                    productoSelect.disabled = false;
-                }
-
 
                 return newRow;
             };
@@ -238,7 +208,6 @@
                         nombre_producto: row.querySelector('[name="nombre_producto"]').value,
                         sku: row.querySelector('[name="sku"]').value,
                         precio_venta: row.querySelector('[name="precio_venta"]').value,
-                        status: row.querySelector('[name="status"]').value,
                     };
 
                     const id = row.dataset.id;
@@ -291,7 +260,6 @@
                         input.disabled = !isEditing;
                     }
                 });
-                // Manually handle the disabled state of selects
                 if(isEditing){
                     row.querySelector('.compra-id-select').disabled = false;
                     const selectedCompraId = row.querySelector('.compra-id-select').value;
@@ -300,7 +268,7 @@
                     row.querySelector('.compra-id-select').disabled = true;
                     row.querySelector('.producto-select').disabled = true;
                 }
-                
+
                 editBtn.style.display = isEditing ? 'none' : 'inline-block';
                 saveBtn.style.display = isEditing ? 'inline-block' : 'none';
             };
