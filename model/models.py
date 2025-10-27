@@ -4,7 +4,7 @@ from datetime import datetime
 class User(db.Model):
     __tablename__ = 'users'
     __table_args__ = {'extend_existing': True}  # ← Añade esta línea
-    
+
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
@@ -49,12 +49,12 @@ class Inventario(db.Model):
     __tablename__ = 'inventario'
     id = db.Column(db.Integer, primary_key=True)
     compra_id = db.Column(db.Integer, db.ForeignKey('compras.compra_id'), unique=True, nullable=False)
+    proveedor = db.Column(db.String(100), nullable=False)
     nombre_producto = db.Column(db.String(100), nullable=False)
     sku = db.Column(db.String(100), nullable=False)
     precio_compra = db.Column(db.Float, nullable=False)
     precio_venta = db.Column(db.Float, nullable=False)
     cantidad_total = db.Column(db.Integer, nullable=False)
-    status = db.Column(db.String(50), nullable=False, default='esperando')
     fecha_recepcion = db.Column(db.Date, nullable=True)
 
     def __repr__(self):
