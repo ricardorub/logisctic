@@ -15,13 +15,13 @@ def get_all_inventario():
 def create_inventario():
     return inventario_controller.create_inventario()
 
-@inventario_bp.route('/api/inventario/<int:item_id>', methods=['PUT'])
-def update_inventario(item_id):
-    return inventario_controller.update_inventario(item_id)
+@inventario_bp.route('/api/inventario/<string:nombre_producto>', methods=['PUT'])
+def update_inventario(nombre_producto):
+    return inventario_controller.update_inventario(nombre_producto)
 
-@inventario_bp.route('/api/inventario/<int:item_id>', methods=['DELETE'])
-def delete_inventario(item_id):
-    return inventario_controller.delete_inventario(item_id)
+@inventario_bp.route('/api/inventario/<string:nombre_producto>', methods=['DELETE'])
+def delete_inventario(nombre_producto):
+    return inventario_controller.delete_inventario(nombre_producto)
 
 @inventario_bp.route('/api/inventario/productos', methods=['GET'])
 def get_productos_inventario():

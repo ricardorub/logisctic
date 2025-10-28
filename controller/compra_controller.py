@@ -14,7 +14,8 @@ def get_all_compras():
         'cantidad_proveedor': compra.cantidad_proveedor,
         'precio_unitario': compra.precio_unitario,
         'fecha_compra': compra.fecha_compra.strftime('%Y-%m-%d'),
-        'fecha_entrega': compra.fecha_entrega.strftime('%Y-%m-%d')
+        'fecha_entrega': compra.fecha_entrega.strftime('%Y-%m-%d'),
+        'sku': compra.sku
     } for compra in compras]), 200
 
 def create_compra():
@@ -39,6 +40,16 @@ def create_compra():
         if not Compra.query.filter_by(compra_id=compra_id).first():
             break
 
+    # Generate or retrieve SKU
+    existing_item = Compra.query.filter_by(nombre_producto=nombre_producto).first()
+    if existing_item and existing_item.sku:
+        sku = existing_item.sku
+    else:
+        while True:
+            sku = str(random.randint(100000, 999999))
+            if not Compra.query.filter_by(sku=sku).first():
+                break
+
     new_compra = Compra(
         compra_id=compra_id,
         proveedor=proveedor,
@@ -46,7 +57,8 @@ def create_compra():
         cantidad_proveedor=int(cantidad_proveedor),
         precio_unitario=float(precio_unitario),
         fecha_compra=datetime.now().date(),
-        fecha_entrega=fecha_entrega
+        fecha_entrega=fecha_entrega,
+        sku=sku
     )
 
     try:
@@ -76,6 +88,18 @@ def update_compra(compra_id):
         fecha_entrega = datetime.strptime(fecha_entrega_str, '%Y-%m-%d').date()
     except ValueError:
         return jsonify({'error': 'Formato de fecha inválido. Use YYYY-MM-DD'}), 400
+
+    # If the product name is being changed, update the SKU
+    if compra.nombre_producto != nombre_producto:
+        existing_item = Compra.query.filter_by(nombre_producto=nombre_producto).first()
+        if existing_item and existing_item.sku:
+            compra.sku = existing_item.sku
+        else:
+            while True:
+                sku = str(random.randint(100000, 999999))
+                if not Compra.query.filter_by(sku=sku).first():
+                    compra.sku = sku
+                    break
 
     compra.proveedor = proveedor
     compra.nombre_producto = nombre_producto
