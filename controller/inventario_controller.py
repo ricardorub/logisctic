@@ -8,32 +8,27 @@ import pandas as pd
 import io
 
 def get_all_inventario():
-    # Subquery to sum the quantity for each product from all inventory items
-    sum_subquery = db.session.query(
+    # Group by product name and aggregate the results
+    inventario_agregado = db.session.query(
         Inventario.nombre_producto,
-        func.sum(Inventario.cantidad_total).label('summed_total')
-    ).group_by(Inventario.nombre_producto).subquery()
-
-    # Query inventory items and join with the summed quantities
-    inventario_items = db.session.query(
-        Inventario,
-        sum_subquery.c.summed_total
-    ).join(sum_subquery, Inventario.nombre_producto == sum_subquery.c.nombre_producto).all()
+        func.sum(Inventario.cantidad_total).label('cantidad_total'),
+        func.avg(Inventario.precio_compra).label('precio_compra'),
+        func.max(Inventario.precio_venta).label('precio_venta'),
+        func.max(Inventario.sku).label('sku'),
+        func.max(Inventario.fecha_recepcion).label('fecha_recepcion')
+    ).group_by(Inventario.nombre_producto).all()
 
     result = []
-    for item, summed_total in inventario_items:
+    for item in inventario_agregado:
         result.append({
-            'id': item.id,
-            'compra_id': item.compra_id,
-            'proveedor': item.proveedor,
             'nombre_producto': item.nombre_producto,
             'sku': item.sku,
             'precio_compra': item.precio_compra,
             'precio_venta': item.precio_venta,
-            'cantidad_total': summed_total,
+            'cantidad_total': int(item.cantidad_total),
             'fecha_recepcion': item.fecha_recepcion.strftime('%Y-%m-%d') if item.fecha_recepcion else None
         })
-        
+
     return jsonify(result), 200
 
 def create_inventario():
@@ -46,26 +41,16 @@ def create_inventario():
 
     if Inventario.query.filter_by(compra_id=compra_id).first():
         return jsonify({'error': 'Este Compra ID ya ha sido registrado en el inventario.'}), 400
-    
+
     compra = Compra.query.filter_by(compra_id=compra_id).first()
     if not compra:
         return jsonify({'error': 'Compra ID no encontrado'}), 404
 
-    # Generate or retrieve SKU
-    existing_item = Inventario.query.filter_by(nombre_producto=compra.nombre_producto).first()
-    if existing_item:
-        sku = existing_item.sku
-    else:
-        while True:
-            sku = str(random.randint(100000, 999999))
-            if not Inventario.query.filter_by(sku=sku).first():
-                break
-    
     new_item = Inventario(
         compra_id=compra_id,
         proveedor=compra.proveedor,
         nombre_producto=compra.nombre_producto,
-        sku=sku,
+        sku=compra.sku,
         precio_compra=compra.precio_unitario,
         precio_venta=float(precio_venta),
         cantidad_total=compra.cantidad_proveedor, # Storing the individual quantity
@@ -88,62 +73,63 @@ def get_productos_inventario():
         'precio_compra': p.precio_compra
     } for p in productos]), 200
 
-def update_inventario(item_id):
+def update_inventario(nombre_producto):
     data = request.get_json()
-    item = Inventario.query.get(item_id)
-    if not item:
-        return jsonify({'error': 'Item de inventario no encontrado'}), 404
-
     precio_venta = data.get('precio_venta')
+
     if precio_venta is None:
         return jsonify({'error': 'Precio Venta es requerido'}), 400
-    
+
     try:
-        item.precio_venta = float(precio_venta)
+        items_to_update = Inventario.query.filter_by(nombre_producto=nombre_producto).all()
+        if not items_to_update:
+            return jsonify({'error': 'No se encontraron items para el producto especificado'}), 404
+
+        for item in items_to_update:
+            item.precio_venta = float(precio_venta)
+
         db.session.commit()
-        return jsonify({'message': 'Item de inventario actualizado exitosamente'}), 200
+        return jsonify({'message': f'Precio de venta actualizado para {nombre_producto}'}), 200
     except (ValueError, TypeError):
         return jsonify({'error': 'Precio de venta debe ser un número válido'}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-def delete_inventario(item_id):
-    item = Inventario.query.get(item_id)
-    if not item:
-        return jsonify({'error': 'Item de inventario no encontrado'}), 404
-
+def delete_inventario(nombre_producto):
+    # Deleting is based on product name in the aggregated view
     try:
-        db.session.delete(item)
+        items_to_delete = Inventario.query.filter_by(nombre_producto=nombre_producto).all()
+        if not items_to_delete:
+            return jsonify({'error': 'No se encontraron items para el producto especificado'}), 404
+
+        for item in items_to_delete:
+            db.session.delete(item)
+
         db.session.commit()
-        return jsonify({'message': 'Item de inventario eliminado exitosamente'}), 200
+        return jsonify({'message': f'Items de inventario para {nombre_producto} eliminados exitosamente'}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 def export_inventario():
-    # Subquery to sum the quantity for each product from all inventory items
-    sum_subquery = db.session.query(
+    inventario_agregado = db.session.query(
         Inventario.nombre_producto,
-        func.sum(Inventario.cantidad_total).label('summed_total')
-    ).group_by(Inventario.nombre_producto).subquery()
-
-    # Query inventory items and join with the summed quantities
-    inventario_items = db.session.query(
-        Inventario,
-        sum_subquery.c.summed_total
-    ).join(sum_subquery, Inventario.nombre_producto == sum_subquery.c.nombre_producto).all()
+        func.sum(Inventario.cantidad_total).label('cantidad_total'),
+        func.avg(Inventario.precio_compra).label('precio_compra'),
+        func.max(Inventario.precio_venta).label('precio_venta'),
+        func.max(Inventario.sku).label('sku'),
+        func.max(Inventario.fecha_recepcion).label('fecha_recepcion')
+    ).group_by(Inventario.nombre_producto).all()
 
     result = []
-    for item, summed_total in inventario_items:
+    for item in inventario_agregado:
         result.append({
-            'Compra ID': item.compra_id,
-            'Proveedor': item.proveedor,
             'Nombre Producto': item.nombre_producto,
             'SKU': item.sku,
             'Precio Compra': item.precio_compra,
             'Precio Venta': item.precio_venta,
-            'Cantidad Total': summed_total,
+            'Cantidad Total': int(item.cantidad_total),
             'Fecha Recepcion': item.fecha_recepcion.strftime('%Y-%m-%d') if item.fecha_recepcion else None
         })
 

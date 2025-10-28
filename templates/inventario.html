@@ -13,43 +13,43 @@
             --gris-oscuro: #212529;
             --gris-claro: #f8f9fa;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--gris-claro);
             color: var(--gris-oscuro);
         }
-        
+
         .navbar {
             background-color: var(--amarillo-vibrante) !important;
             box-shadow: 0 2px 4px rgba(0,0,0,.1);
         }
-        
+
         .navbar-brand {
             font-weight: bold;
             color: var(--gris-oscuro) !important;
         }
-        
+
         .hero-section {
             background: linear-gradient(135deg, var(--amarillo-vibrante) 0%, var(--amarillo-oscuro) 100%);
             padding: 80px 0;
             margin-bottom: 40px;
             border-radius: 0 0 20px 20px;
         }
-        
+
         .card {
             border: none;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,.1);
             margin-bottom: 20px;
         }
-        
+
         .card-header {
             background-color: var(--amarillo-vibrante);
             border-bottom: none;
             font-weight: bold;
         }
-        
+
         .btn-primary {
             background-color: var(--amarillo-vibrante);
             border-color: var(--amarillo-oscuro);
@@ -62,7 +62,7 @@
     {% include 'sidebar.html' %}
 
     <div class="main">
-    
+
 
     <!-- Main Content -->
     <div class="container">
@@ -87,8 +87,6 @@
                             <table class="table table-hover" id="inventarioTable">
                                 <thead>
                                     <tr>
-                                        <th>Compra ID</th>
-                                        <th>Proveedor</th>
                                         <th>Nombre Producto</th>
                                         <th>SKU</th>
                                         <th>Precio Compra</th>
@@ -118,8 +116,6 @@
             const createRow = (data = {}) => {
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
-                    <td><input type="text" class="form-control" name="compra_id" value="${data.compra_id || ''}" readonly></td>
-                    <td><input type="text" class="form-control" name="proveedor" value="${data.proveedor || ''}" readonly></td>
                     <td><input type="text" class="form-control" name="nombre_producto" value="${data.nombre_producto || ''}" readonly></td>
                     <td><input type="text" class="form-control" name="sku" value="${data.sku || ''}" readonly></td>
                     <td><input type="number" class="form-control" name="precio_compra" value="${data.precio_compra || ''}" readonly></td>
@@ -135,7 +131,7 @@
 
                 return newRow;
             };
-            
+
             // Function to create an editable row for adding new items
             const createNewEditableRow = () => {
                 const newRow = document.createElement('tr');
@@ -145,8 +141,6 @@
                             <option value="">Seleccione...</option>
                         </select>
                     </td>
-                    <td><input type="text" class="form-control" name="proveedor" readonly></td>
-                    <td><input type="text" class="form-control" name="nombre_producto" readonly></td>
                     <td><input type="text" class="form-control" name="sku" readonly></td>
                     <td><input type="number" class="form-control" name="precio_compra" readonly></td>
                     <td><input type="number" class="form-control" name="precio_venta"></td>
@@ -178,13 +172,13 @@
                         fetch(`/api/compras/details/${selectedCompraId}`)
                             .then(response => response.json())
                             .then(details => {
-                                newRow.querySelector('[name="proveedor"]').value = details.proveedor;
                                 newRow.querySelector('[name="nombre_producto"]').value = details.nombre_producto;
+                                newRow.querySelector('[name="sku"]').value = details.sku;
                                 newRow.querySelector('[name="precio_compra"]').value = details.precio_unitario;
                             });
                     }
                 });
-                
+
                 return newRow;
             };
 
@@ -206,6 +200,8 @@
                 if (!target) return;
 
                 const row = target.closest('tr');
+                const nombre_producto = row.querySelector('[name="nombre_producto"]').value;
+
 
                 if (target.classList.contains('edit-btn')) {
                     toggleEdit(row, true);
@@ -219,9 +215,8 @@
                         data.compra_id = row.querySelector('[name="compra_id"]').value;
                     }
 
-                    const id = row.dataset.id;
-                    const url = id ? `/api/inventario/${id}` : '/api/inventario';
-                    const method = id ? 'PUT' : 'POST';
+                    const url = isNew ? '/api/inventario' : `/api/inventario/${nombre_producto}`;
+                    const method = isNew ? 'POST' : 'PUT';
 
                     try {
                         const response = await fetch(url, {
@@ -240,11 +235,10 @@
                         console.error('Error al guardar:', error);
                     }
                 } else if (target.classList.contains('delete-btn')) {
-                    const id = row.dataset.id;
-                    if (id) {
+                    if (nombre_producto) {
                         if (confirm('¿Está seguro de que desea eliminar este item?')) {
                             try {
-                                const response = await fetch(`/api/inventario/${id}`, { method: 'DELETE' });
+                                const response = await fetch(`/api/inventario/${nombre_producto}`, { method: 'DELETE' });
                                 if (response.ok) {
                                     row.remove();
                                 } else {
@@ -277,7 +271,7 @@
                     inventarioTableBody.innerHTML = '';
                     inventario.forEach(item => {
                         const row = createRow(item);
-                        row.dataset.id = item.id;
+                        row.dataset.id = item.nombre_producto;
                         inventarioTableBody.appendChild(row);
                         toggleEdit(row, false);
                     });

@@ -4,7 +4,7 @@ from datetime import datetime
 class User(db.Model):
     __tablename__ = 'users'
     __table_args__ = {'extend_existing': True}
-    
+
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
@@ -40,7 +40,8 @@ class Compra(db.Model):
     precio_unitario = db.Column(db.Float, nullable=False)
     fecha_compra = db.Column(db.Date, nullable=False)
     fecha_entrega = db.Column(db.Date, nullable=False)
-    
+    sku = db.Column(db.String(6))
+
     # --- INICIO DE LA MODIFICACIÓN ---
     # Esta es la relación que define el borrado en cascada
     # basado en el `compra_id`.
