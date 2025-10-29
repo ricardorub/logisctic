@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Mejorada</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --danger: #b5179e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --vibrant-1: #7209b7;
+            --vibrant-2: #3a0ca3;
+            --vibrant-3: #4361ee;
+            --vibrant-4: #4cc9f0;
+            --vibrant-5: #f72585;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+            color: #333;
+        }
+        
+        /* Sidebar mejorada */
+        .sidebar {
+            height: 100vh;
+            width: 180px; /* Más estrecho que antes */
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            background: linear-gradient(180deg, var(--vibrant-1), var(--vibrant-2));
+            overflow-x: hidden;
+            padding-top: 20px;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar:hover {
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar-header {
+            padding: 0 16px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-tagline {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            margin: 0;
+        }
+        
+        .sidebar a {
+            padding: 12px 16px;
+            text-decoration: none;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            margin: 5px 10px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .sidebar a i {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar a:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid var(--vibrant-4);
+            transform: translateX(3px);
+        }
+        
+        .sidebar a.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 3px solid var(--vibrant-5);
+            font-weight: 600;
+        }
+        
+        .sidebar-footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+        }
+        
+        /* Contenido principal */
+        .main {
+            margin-left: 180px; /* Igual al ancho del sidebar */
+            padding: 20px 30px;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--vibrant-1), var(--vibrant-2));
+            color: white;
+            padding: 1.5rem 0;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--vibrant-3), var(--vibrant-4));
+            color: white;
+            font-weight: 600;
+            border-bottom: none;
+            padding: 1rem 1.25rem;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-left: 4px solid var(--vibrant-5);
+        }
+        
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--vibrant-2);
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        /* Responsive */
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar a span {
+                display: none;
+            }
+            
+            .sidebar a i {
+                margin-right: 0;
+                font-size: 20px;
+            }
+            
+            .sidebar-header, .sidebar-footer {
+                display: none;
+            }
+            
+            .main {
+                margin-left: 70px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar mejorada -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-logo">MiApp</a>
+            <p class="sidebar-tagline">Panel de Control</p>
+        </div>
+        
+        <a href="/" class="active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/dashboard">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="/compra">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Compra</span>
+        </a>
+        <a href="/inventario">
+            <i class="fas fa-boxes"></i>
+            <span>Inventario</span>
+        </a>
+        <a href="/reposicion">
+            <i class="fas fa-cash-register"></i>
+            <span>reposicion</span>
+        </a>
+        <a href="/sandbox">
+            <i class="fas fa-flask"></i>
+            <span>Test</span>
+        </a>
+        <a href="/file">
+            <i class="fas fa-file"></i>
+            <span>File</span>
+        </a>
+        
+        
+        <div class="sidebar-footer">
+            v2.1.0
+        </div>
+    </div>
+    </body>
