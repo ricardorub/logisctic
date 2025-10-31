@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Test Compras - Retail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --amarillo-vibrante: #FFEB3B;
+            --amarillo-oscuro: #FBC02D;
+            --gris-oscuro: #212529;
+            --gris-claro: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--gris-claro);
+            color: var(--gris-oscuro);
+        }
+        
+        .navbar {
+            background-color: var(--amarillo-vibrante) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--gris-oscuro) !important;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--amarillo-vibrante) 0%, var(--amarillo-oscuro) 100%);
+            padding: 80px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background-color: var(--amarillo-vibrante);
+            border-bottom: none;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: var(--amarillo-vibrante);
+            border-color: var(--amarillo-oscuro);
+            color: var(--gris-oscuro);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    {% include 'sidebar.html' %}
+
+    <div class="main">
+    
+   
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 text-end">
+                <button id="addItemBtn" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Añadir Item
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Test Compras</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="comprasTable">
+                                <thead>
+                                    <tr>
+                                        <th>Compra ID</th>
+                                        <th>SKU</th>
+                                        <th>Proveedor</th>
+                                        <th>Nombre Producto</th>
+                                        <th>Cantidad Proveedor</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Fecha Compra</th>
+                                        <th>Fecha Entrega</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rows will be added dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12 text-end">
+                <button id="addInventarioItemBtn" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Añadir Item a Inventario
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Test Inventario</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="inventarioTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre Producto</th>
+                                        <th>SKU</th>
+                                        <th>Precio Compra</th>
+                                        <th>Precio Venta</th>
+                                        <th>Cantidad Total</th>
+                                        <th>Estado</th>
+                                        <th>Fecha Recepcion</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rows will be added dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12 text-end">
+                <button id="addReposicionItemBtn" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Añadir Reposición
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Test Reposición</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="reposicionTable">
+                                <thead>
+                                    <tr>
+                                        <th>Reposición ID</th>
+                                        <th>SKU</th>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Tienda</th>
+                                        <th>Fecha de Reposición</th>
+                                        <th>Fecha de Despacho</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rows will be added dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addItemBtn = document.getElementById('addItemBtn');
+            const comprasTableBody = document.querySelector('#comprasTable tbody');
+
+            const proveedores = [
+                "Master G",
+                "Importaciones Hiraoka",
+                "Tiendas EFE",
+                "Electro Tiendas",
+                "Diproelsac",
+                "Electro D&A",
+                "Grupo Yang Perú"
+            ];
+
+            const createRow = (data = {}) => {
+                const newRow = document.createElement('tr');
+                const today = new Date().toISOString().split('T')[0];
+                const compraId = data.compra_id ? String(data.compra_id).padStart(6, '0') : 'N/A';
+                newRow.innerHTML = `
+                    <td><input type="text" class="form-control" value="${compraId}" readonly></td>
+                    <td><input type="text" class="form-control" name="sku" value="${data.sku || ''}" readonly></td>
+                    <td>
+                        <select class="form-select" name="proveedor">
+                            ${proveedores.map(p => `<option value="${p}" ${data.proveedor === p ? 'selected' : ''}>${p}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control" name="nombre_producto" value="${data.nombre_producto || ''}"></td>
+                    <td><input type="number" class="form-control" name="cantidad_proveedor" value="${data.cantidad_proveedor || ''}"></td>
+                    <td><input type="number" class="form-control" name="precio_unitario" step="0.01" value="${data.precio_unitario || ''}"></td>
+                    <td><input type="date" class="form-control" name="fecha_compra" value="${data.fecha_compra || today}" readonly></td>
+                    <td><input type="date" class="form-control" name="fecha_entrega" value="${data.fecha_entrega || ''}"></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-btn"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-success save-btn" style="display: none;"><i class="fas fa-save"></i></button>
+                        <button class="btn btn-sm btn-danger delete-btn"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                return newRow;
+            };
+
+            addItemBtn.addEventListener('click', async () => {
+                if (confirm('¿Está seguro de que desea importar las primeras 40 compras? Esto borrará todos los datos existentes en Test Compras.')) {
+                    try {
+                        const response = await fetch('/api/test_compras/import', { method: 'POST' });
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            console.error('Error importing data');
+                        }
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }
+            });
+
+            comprasTableBody.addEventListener('click', async (e) => {
+                const target = e.target;
+                const row = target.closest('tr');
+
+                if (target.classList.contains('edit-btn') || target.parentElement.classList.contains('edit-btn')) {
+                    toggleEdit(row, true);
+                } else if (target.classList.contains('save-btn') || target.parentElement.classList.contains('save-btn')) {
+                    const id = row.dataset.id;
+                    if (id && !confirm('¿Está seguro de que desea actualizar esta compra?')) {
+                        return;
+                    }
+
+                    const data = {
+                        proveedor: row.querySelector('[name="proveedor"]').value,
+                        nombre_producto: row.querySelector('[name="nombre_producto"]').value,
+                        cantidad_proveedor: row.querySelector('[name="cantidad_proveedor"]').value,
+                        precio_unitario: row.querySelector('[name="precio_unitario"]').value,
+                        fecha_compra: row.querySelector('[name="fecha_compra"]').value,
+                        fecha_entrega: row.querySelector('[name="fecha_entrega"]').value,
+                    };
+
+                    const url = id ? `/api/test_compras/${id}` : '/api/test_compras';
+                    const method = id ? 'PUT' : 'POST';
+
+                    try {
+                        const response = await fetch(url, {
+                            method,
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data),
+                        });
+
+                        if (response.ok) {
+                            loadCompras();
+                        } else {
+                            console.error('Error saving data');
+                        }
+                    } catch (error) {
+                        console.error(error);
+                    }
+                } else if (target.classList.contains('delete-btn') || target.parentElement.classList.contains('delete-btn')) {
+                    const id = row.dataset.id;
+                    if (id) {
+                        if (confirm('¿Está seguro de que desea eliminar esta compra?')) {
+                            try {
+                                const response = await fetch(`/api/test_compras/${id}`, { method: 'DELETE' });
+                                if (response.ok) {
+                                    row.remove();
+                                } else {
+                                    console.error('Error deleting data');
+                                }
+                            } catch (error) {
+                                console.error(error);
+                            }
+                        }
+                    } else {
+                        row.remove();
+                    }
+                }
+            });
+
+            const toggleEdit = (row, isEditing) => {
+                const inputs = row.querySelectorAll('input, select');
+                const editBtn = row.querySelector('.edit-btn');
+                const saveBtn = row.querySelector('.save-btn');
+
+                inputs.forEach(input => {
+                    if(input.name !== 'sku' && input.name !== 'fecha_compra') {
+                       input.disabled = !isEditing
+                    }
+                });
+                editBtn.style.display = isEditing ? 'none' : 'inline-block';
+                saveBtn.style.display = isEditing ? 'inline-block' : 'none';
+            };
+
+            const loadCompras = async () => {
+                try {
+                    const response = await fetch('/api/test_compras');
+                    const compras = await response.json();
+                    comprasTableBody.innerHTML = '';
+                    compras.forEach(compra => {
+                        const row = createRow(compra);
+                        row.dataset.id = compra.id;
+                        comprasTableBody.appendChild(row);
+                        toggleEdit(row, false);
+                    });
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+
+            loadCompras();
+
+            const addInventarioItemBtn = document.getElementById('addInventarioItemBtn');
+            const inventarioTableBody = document.querySelector('#inventarioTable tbody');
+
+            const createInventarioRow = (data = {}) => {
+                const newRow = document.createElement('tr');
+                const cantidad = data.cantidad_total || 0;
+                let estado, color;
+
+                if (cantidad <= 0) {
+                    estado = 'Agotado';
+                    color = 'red';
+                } else if (cantidad > 0 && cantidad <= 10) {
+                    estado = 'Stock Bajo';
+                    color = 'orange';
+                } else {
+                    estado = 'Disponible';
+                    color = 'green';
+                }
+
+                newRow.innerHTML = `
+                    <td><input type="text" class="form-control" name="nombre_producto" value="${data.nombre_producto || ''}" readonly></td>
+                    <td><input type="text" class="form-control" name="sku" value="${data.sku || ''}" readonly></td>
+                    <td><input type="number" class="form-control" name="precio_compra" value="${data.precio_compra || ''}" readonly></td>
+                    <td><input type="number" class="form-control" name="precio_venta" value="${data.precio_venta || ''}" readonly></td>
+                    <td><input type="number" class="form-control" name="cantidad_total" value="${cantidad}" readonly></td>
+                    <td style="color: ${color}; font-weight: bold;">${estado}</td>
+                    <td><input type="date" class="form-control" name="fecha_recepcion" value="${data.fecha_recepcion || ''}" readonly></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-inventario-btn"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-success save-inventario-btn" style="display: none;"><i class="fas fa-save"></i></button>
+                        <button class="btn btn-sm btn-danger delete-inventario-btn"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                return newRow;
+            };
+
+            const createNewInventarioEditableRow = () => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>
+                        <select class="form-select compra-id-select" name="compra_id">
+                            <option value="">Seleccione...</option>
+                        </select>
+                        <input type="text" class="form-control mt-2" name="nombre_producto" readonly style="display: none;">
+                    </td>
+                    <td><input type="text" class="form-control" name="sku" readonly></td>
+                    <td><input type="number" class="form-control" name="precio_compra" readonly></td>
+                    <td><input type="number" class="form-control" name="precio_venta"></td>
+                    <td><input type="number" class="form-control" name="cantidad_total" readonly></td>
+                    <td>-</td>
+                    <td><input type="date" class="form-control" name="fecha_recepcion" value="${new Date().toISOString().split('T')[0]}" readonly></td>
+                    <td>
+                        <button class="btn btn-sm btn-success save-inventario-btn"><i class="fas fa-save"></i></button>
+                        <button class="btn btn-sm btn-danger delete-inventario-btn"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+
+                const compraIdSelect = newRow.querySelector('.compra-id-select');
+                fetch('/api/available_test_compra_ids')
+                    .then(response => response.json())
+                    .then(compras => {
+                        compras.forEach(compra => {
+                            const option = document.createElement('option');
+                            option.value = compra.compra_id;
+                            option.textContent = `${compra.nombre_producto} (ID: ${compra.compra_id})`;
+                            compraIdSelect.appendChild(option);
+                        });
+                    });
+
+                compraIdSelect.addEventListener('change', () => {
+                    const selectedCompraId = compraIdSelect.value;
+                    if (selectedCompraId) {
+                        fetch(`/api/test_compras/details/${selectedCompraId}`)
+                            .then(response => response.json())
+                            .then(details => {
+                                const nombreProductoInput = newRow.querySelector('[name="nombre_producto"]');
+                                nombreProductoInput.value = details.nombre_producto;
+                                newRow.querySelector('[name="sku"]').value = details.sku;
+                                newRow.querySelector('[name="precio_compra"]').value = details.precio_unitario;
+                                
+                                compraIdSelect.style.display = 'none';
+                                nombreProductoInput.style.display = 'block';
+                            });
+                    }
+                });
+                
+                return newRow;
+            };
+
+            addInventarioItemBtn.addEventListener('click', async () => {
+                if (confirm('¿Está seguro de que desea importar los primeros 40 items de inventario? Esto borrará todos los datos existentes en Test Inventario.')) {
+                    try {
+                        const response = await fetch('/api/test_inventario/import', { method: 'POST' });
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            console.error('Error importing data');
+                        }
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }
+            });
+
+            inventarioTableBody.addEventListener('click', async (e) => {
+                const target = e.target.closest('button');
+                if (!target) return;
+
+                const row = target.closest('tr');
+                const nombre_producto_input = row.querySelector('[name="nombre_producto"]');
+                const nombre_producto = nombre_producto_input ? nombre_producto_input.value : null;
+
+                if (target.classList.contains('edit-inventario-btn')) {
+                    toggleInventarioEdit(row, true);
+                } else if (target.classList.contains('save-inventario-btn')) {
+                    const isNew = !row.dataset.id;
+                    const data = {
+                        precio_venta: row.querySelector('[name="precio_venta"]').value
+                    };
+
+                    if (isNew) {
+                        data.compra_id = row.querySelector('[name="compra_id"]').value;
+                    }
+
+                    const url = isNew ? '/api/test_inventario' : `/api/test_inventario/${nombre_producto}`;
+                    const method = isNew ? 'POST' : 'PUT';
+
+                    try {
+                        const response = await fetch(url, {
+                            method,
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data),
+                        });
+
+                        if (response.ok) {
+                            loadInventario();
+                            loadCompras();
+                        } else {
+                            const errorData = await response.json();
+                            alert(`Error: ${errorData.error || 'Ocurrió un error.'}`);
+                        }
+                    } catch (error) {
+                        console.error('Error al guardar:', error);
+                    }
+                } else if (target.classList.contains('delete-inventario-btn')) {
+                    if (nombre_producto) {
+                        if (confirm('¿Está seguro de que desea eliminar este item?')) {
+                            try {
+                                const response = await fetch(`/api/test_inventario/${nombre_producto}`, { method: 'DELETE' });
+                                if (response.ok) {
+                                    row.remove();
+                                    loadCompras();
+                                } else {
+                                    console.error('Error deleting data');
+                                }
+                            } catch (error) {
+                                console.error('Error al eliminar:', error);
+                            }
+                        }
+                    } else {
+                        row.remove();
+                    }
+                }
+            });
+
+            const toggleInventarioEdit = (row, isEditing) => {
+                const precioVentaInput = row.querySelector('input[name="precio_venta"]');
+                precioVentaInput.readOnly = !isEditing;
+
+                row.querySelector('.edit-inventario-btn').style.display = isEditing ? 'none' : 'inline-block';
+                row.querySelector('.save-inventario-btn').style.display = isEditing ? 'inline-block' : 'none';
+            };
+
+            const loadInventario = async () => {
+                try {
+                    const response = await fetch('/api/test_inventario');
+                    const inventario = await response.json();
+                    inventarioTableBody.innerHTML = '';
+                    inventario.forEach(item => {
+                        const row = createInventarioRow(item);
+                        row.dataset.id = item.nombre_producto;
+                        inventarioTableBody.appendChild(row);
+                        toggleInventarioEdit(row, false);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar el inventario:', error);
+                }
+            };
+
+            loadInventario();
+
+            const addReposicionItemBtn = document.getElementById('addReposicionItemBtn');
+            const reposicionTableBody = document.querySelector('#reposicionTable tbody');
+            let testProductosDisponibles = [];
+
+            const createReposicionRow = (data = {}) => {
+                const newRow = document.createElement('tr');
+                const today = new Date().toISOString().split('T')[0];
+                const reposicionId = data.reposicion_id ? String(data.reposicion_id).padStart(6, '0') : 'N/A';
+                
+                const productoOptions = testProductosDisponibles.map(p => 
+                    `<option value="${p.nombre_producto}" data-sku="${p.sku}" data-cantidad-total="${p.cantidad_total}" ${data.nombre_producto === p.nombre_producto ? 'selected' : ''}>
+                        ${p.nombre_producto}
+                    </option>`
+                ).join('');
+
+                newRow.innerHTML = `
+                    <td><input type="text" class="form-control" value="${reposicionId}" readonly></td>
+                    <td><input type="text" class="form-control" name="sku" value="${data.sku || ''}" readonly></td>
+                    <td>
+                        <select class="form-select" name="nombre_producto">
+                            <option value="">Seleccione un producto</option>
+                            ${productoOptions}
+                        </select>
+                    </td>
+                    <td><input type="number" class="form-control" name="cantidad" value="${data.cantidad || ''}"></td>
+                    <td><input type="text" class="form-control" name="tienda" value="${data.tienda || ''}"></td>
+                    <td><input type="date" class="form-control" name="fecha_reposicion" value="${data.fecha_reposicion || today}" readonly></td>
+                    <td><input type="date" class="form-control" name="fecha_despacho" value="${data.fecha_despacho || ''}"></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-reposicion-btn"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-success save-reposicion-btn" style="display: none;"><i class="fas fa-save"></i></button>
+                        <button class="btn btn-sm btn-danger delete-reposicion-btn"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                return newRow;
+            };
+
+            addReposicionItemBtn.addEventListener('click', () => {
+                const newRow = createReposicionRow();
+                reposicionTableBody.appendChild(newRow);
+                toggleReposicionEdit(newRow, true, true);
+            });
+
+            reposicionTableBody.addEventListener('change', (e) => {
+                if (e.target.name === 'nombre_producto') {
+                    const selectedOption = e.target.options[e.target.selectedIndex];
+                    const row = e.target.closest('tr');
+                    row.querySelector('[name="sku"]').value = selectedOption.dataset.sku || '';
+                    row.dataset.cantidadTotal = selectedOption.dataset.cantidadTotal || '0';
+                }
+            });
+
+            reposicionTableBody.addEventListener('click', async (e) => {
+                const target = e.target.closest('button');
+                if (!target) return;
+
+                const row = target.closest('tr');
+                const id = row.dataset.id;
+
+                if (target.classList.contains('edit-reposicion-btn')) {
+                    toggleReposicionEdit(row, true, false);
+                } else if (target.classList.contains('save-reposicion-btn')) {
+                    const cantidadInput = row.querySelector('[name="cantidad"]');
+                    const cantidad = parseInt(cantidadInput.value, 10);
+                    const cantidadTotal = parseInt(row.dataset.cantidadTotal, 10);
+
+                    if (cantidad > cantidadTotal && !id) {
+                        alert('Cantidad insuficiente en el inventario');
+                        return;
+                    }
+
+                    const data = {
+                        nombre_producto: row.querySelector('[name="nombre_producto"]').value,
+                        cantidad: cantidad,
+                        tienda: row.querySelector('[name="tienda"]').value,
+                        fecha_despacho: row.querySelector('[name="fecha_despacho"]').value,
+                    };
+
+                    const url = id ? `/api/test_reposiciones/${id}` : '/api/test_reposiciones';
+                    const method = id ? 'PUT' : 'POST';
+
+                    try {
+                        const response = await fetch(url, {
+                            method,
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data),
+                        });
+
+                        if (response.ok) {
+                            loadTestProductosDisponibles().then(() => {
+                                loadReposiciones();
+                            });
+                            loadInventario();
+                        } else {
+                            const error = await response.json();
+                            alert(`Error: ${error.error}`);
+                        }
+                    } catch (error) {
+                        console.error(error);
+                    }
+                } else if (target.classList.contains('delete-reposicion-btn')) {
+                    if (id) {
+                        if (confirm('¿Está seguro de que desea eliminar esta reposición?')) {
+                            try {
+                                const response = await fetch(`/api/test_reposiciones/${id}`, { method: 'DELETE' });
+                                if (response.ok) {
+                                    row.remove();
+                                    loadTestProductosDisponibles();
+                                    loadInventario();
+                                } else {
+                                    console.error('Error deleting data');
+                                }
+                            } catch (error) {
+                                console.error('Error al eliminar:', error);
+                            }
+                        }
+                    } else {
+                        row.remove();
+                    }
+                }
+            });
+            
+            const toggleReposicionEdit = (row, isEditing, isNew) => {
+                row.querySelectorAll('input, select').forEach(el => {
+                    if (el.name !== 'reposicion_id' && el.name !== 'sku' && el.name !== 'fecha_reposicion') {
+                        el.disabled = !isEditing;
+                    }
+                });
+                if(isNew){
+                    row.querySelector('.edit-reposicion-btn').style.display = 'none';
+                    row.querySelector('.save-reposicion-btn').style.display = 'inline-block';
+                    row.querySelector('.delete-reposicion-btn').style.display = 'inline-block';
+                } else {
+                    row.querySelector('.edit-reposicion-btn').style.display = isEditing ? 'none' : 'inline-block';
+                    row.querySelector('.save-reposicion-btn').style.display = isEditing ? 'inline-block' : 'none';
+                    row.querySelector('.delete-reposicion-btn').style.display = 'inline-block';
+                }
+            };
+
+            const loadReposiciones = async () => {
+                try {
+                    const response = await fetch('/api/test_reposiciones');
+                    const reposiciones = await response.json();
+                    reposicionTableBody.innerHTML = '';
+                    reposiciones.forEach(reposicion => {
+                        const row = createReposicionRow(reposicion);
+                        row.dataset.id = reposicion.id;
+                        reposicionTableBody.appendChild(row);
+                        toggleReposicionEdit(row, false, false);
+                    });
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+            
+            const loadTestProductosDisponibles = async () => {
+                try {
+                    const response = await fetch('/api/test_productos_disponibles');
+                    testProductosDisponibles = await response.json();
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+
+            loadTestProductosDisponibles().then(() => {
+                loadReposiciones();
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+</body>
+</html>
