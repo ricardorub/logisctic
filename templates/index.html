@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logística Retail Inteligente</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --danger: #b5179e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --vibrant-1: #7209b7;
+            --vibrant-2: #3a0ca3;
+            --vibrant-3: #4361ee;
+            --vibrant-4: #4cc9f0;
+            --vibrant-5: #f72585;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+        
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, var(--vibrant-1), var(--vibrant-2)) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--vibrant-1), var(--vibrant-2), var(--vibrant-3));
+            color: white;
+            padding: 6rem 0;
+            margin-bottom: 3rem;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,202.7C672,203,768,181,864,181.3C960,181,1056,203,1152,213.3C1248,224,1344,224,1392,224L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: bottom;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        
+        /* Cards */
+        .service-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: 15px;
+            overflow: hidden;
+            height: 100%;
+            border: none;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            background: white;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .service-icon {
+            font-size: 3rem;
+            color: var(--vibrant-3);
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            padding: 1rem;
+            border-radius: 50%;
+            background: rgba(67, 97, 238, 0.1);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--vibrant-3), var(--vibrant-4));
+            color: white;
+            font-weight: 600;
+            border-bottom: none;
+            padding: 1.25rem 1.5rem;
+        }
+        
+        /* Testimonials */
+        .testimonial-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            height: 100%;
+            border: none;
+            position: relative;
+        }
+        
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 4rem;
+            color: rgba(67, 97, 238, 0.1);
+            font-family: Georgia, serif;
+            line-height: 1;
+        }
+        
+        .testimonial-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+            border: 4px solid var(--vibrant-3);
+        }
+        
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--vibrant-1), var(--vibrant-2));
+            color: white;
+            padding: 4rem 0 2rem;
+            margin-top: 3rem;
+        }
+        
+        /* Login Modal */
+        .login-modal .modal-content {
+            border-radius: 20px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, var(--vibrant-1), var(--vibrant-2));
+            color: white;
+            padding: 2.5rem;
+            text-align: center;
+        }
+        
+        .login-body {
+            padding: 2.5rem;
+        }
+        
+        .social-login {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .facebook {
+            background: linear-gradient(135deg, #3b5998, #2d4373);
+        }
+        
+        .google {
+            background: linear-gradient(135deg, #dd4b39, #c23321);
+        }
+        
+        .linkedin {
+            background: linear-gradient(135deg, #0077b5, #005885);
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 25px 0;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .divider span {
+            padding: 0 15px;
+            color: #777;
+            font-weight: 500;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--vibrant-3), var(--vibrant-4));
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--vibrant-2), var(--vibrant-3));
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-light {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: var(--vibrant-2);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        
+        .btn-light:hover {
+            background: white;
+            color: var(--vibrant-1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-outline-light {
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-light:hover {
+            background: white;
+            color: var(--vibrant-2);
+            transform: translateY(-2px);
+        }
+
+        /* Form Styles */
+        .contact-form .form-control:focus {
+            border-color: var(--vibrant-3);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .form-control {
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--vibrant-3);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
+        }
+        
+        /* Section Styles */
+        .section-title {
+            color: var(--vibrant-2);
+            font-weight: 700;
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(135deg, var(--vibrant-3), var(--vibrant-4));
+            border-radius: 2px;
+        }
+        
+        .text-center .section-title:after {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Metric Cards */
+        .metric-card {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-left: 4px solid var(--vibrant-5);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--vibrant-2);
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        /* Backgrounds */
+        .vibrant-bg-1 {
+            background: linear-gradient(135deg, var(--vibrant-1), var(--vibrant-2));
+        }
+        
+        .vibrant-bg-2 {
+            background: linear-gradient(135deg, var(--vibrant-3), var(--vibrant-4));
+        }
+        
+        .vibrant-bg-3 {
+            background: linear-gradient(135deg, var(--vibrant-5), #b5179e);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 4rem 0;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hero-buttons .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot me-2"></i>Logística Retail IA
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- 
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#services">Servicios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">Nosotros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testimonials">Casos de Éxito</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contacto</a>
+                    </li>
+                    -->
+                    {% if not user %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal" id="loginLink">
+                            <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item dropdown" id="userDropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <img src="https://ui-avatars.com/api/?name={{ user.email.split('@')[0] }}&background=random" class="user-avatar" alt="Usuario">
+                            <span id="username">{{ user.email.split('@')[0] }}</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section text-center">
+        <div class="container hero-content">
+            <h1 class="display-4 fw-bold mb-4 fade-in-up">Logística Retail Inteligente</h1>
+            <p class="lead mb-4 fade-in-up">Optimiza tu cadena de suministro con IA predictiva para maximizar eficiencia y rentabilidad</p>
+            <div class="hero-buttons">
+                <button class="btn btn-light btn-lg px-4 py-3 fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal">Comenzar Ahora</button>
+                <a href="#services" class="btn btn-outline-light btn-lg px-4 py-3 fw-bold">Saber Más</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="container mb-5 py-5">
+        <h2 class="text-center section-title mb-5">Nuestros Servicios</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card service-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="service-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3 class="card-title h4">Predicción de Demanda</h3>
+                        <p class="card-text">Nuestra IA analiza patrones históricos y factores externos para predecir la demanda con precisión.</p>
+                    </div>
+                </div>
+            </div>
+            <!--  
+            <div class="col-md-4">
+                <div class="card service-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="service-icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <h3 class="card-title h4">Optimización de Rutas</h3>
+                        <p class="card-text">Algoritmos inteligentes que calculan las rutas más eficientes para reducir costos y tiempos de entrega.</p>
+                    </div>
+                </div>
+            </div>
+            -->
+            <div class="col-md-4">
+                <div class="card service-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="service-icon">
+                            <i class="fas fa-warehouse"></i>
+                        </div>
+                        <h3 class="card-title h4">Gestión de Inventarios</h3>
+                        <p class="card-text">Sistemas que optimizan niveles de stock para evitar rupturas y excesos de inventario.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- -->
+            <div class="col-md-4">
+                <div class="card service-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="service-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="card-title h4">Análisis Predictivo</h3>
+                        <p class="card-text">Identificación de tendencias y oportunidades mediante análisis avanzado de datos.</p>
+                    </div>
+                </div>
+            </div>
+             <!-- 
+            <div class="col-md-4">
+                <div class="card service-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="service-icon">
+                            <i class="fas fa-truck-loading"></i>
+                        </div>
+                        <h3 class="card-title h4">Logística de Última Milla</h3>
+                        <p class="card-text">Soluciones especializadas para optimizar la entrega final a tus clientes.</p>
+                    </div>
+                </div>
+            </div>
+            -->
+            <!-- 
+            <div class="col-md-4">
+                <div class="card service-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="service-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h3 class="card-title h4">Automatización de Procesos</h3>
+                        <p class="card-text">Implementación de sistemas que automatizan tareas repetitivas para mayor eficiencia.</p>
+                    </div>
+                </div>
+            </div>
+            -->
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12">
+                    <h2 class="section-title mb-4">Sobre Nuestra Plataforma</h2>
+                    <p class="lead">Nuestro sistema de inteligencia artificial está diseñado específicamente para resolver los desafíos únicos de la logística en el sector retail.</p>
+                    <p>Combinamos algoritmos de machine learning con décadas de experiencia en logística para ofrecer soluciones que realmente funcionan en el mundo real.</p>
+                    <div class="row mt-5">
+                        <div class="col-md-4 mb-4">
+                            <div class="metric-card text-center">
+                                <div class="metric-value">25%</div>
+                                <div class="metric-label">Reducción de costos logísticos</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="metric-card text-center">
+                                <div class="metric-value">30%</div>
+                                <div class="metric-label">Mejora en precisión de pronósticos</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="metric-card text-center">
+                                <div class="metric-value">22%</div>
+                                <div class="metric-label">Reducción en tiempos de entrega</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section 
+    <section id="testimonials" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center section-title mb-5">Casos de Éxito</h2>
+            <div class="row">
+                <div class="col-md-6 col-lg-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Testimonial" class="testimonial-avatar">
+                            <div>
+                                <h5 class="mb-0">María González</h5>
+                                <p class="text-muted mb-0">Directora de Logística, RetailCo</p>
+                            </div>
+                        </div>
+                        <p class="mb-0">"Implementamos el sistema de predicción de demanda y redujimos nuestro stock muerto en un 30% en solo 3 meses. ¡Increíble!"</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Testimonial" class="testimonial-avatar">
+                            <div>
+                                <h5 class="mb-0">Carlos Rodríguez</h5>
+                                <p class="text-muted mb-0">Gerente de Cadena de Suministro, SuperMerc</p>
+                            </div>
+                        </div>
+                        <p class="mb-0">"La optimización de rutas nos permitió reducir nuestros costos de transporte en un 22% y mejorar nuestros tiempos de entrega."</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Testimonial" class="testimonial-avatar">
+                            <div>
+                                <h5 class="mb-0">Laura Martínez</h5>
+                                <p class="text-muted mb-0">CEO, ModaExpress</p>
+                            </div>
+                        </div>
+                        <p class="mb-0">"El análisis predictivo nos ayudó a anticipar tendencias de moda y optimizar nuestro inventario, aumentando nuestras ventas en un 18%."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    -->
+    <!-- Contact Section -->
+    <section id="contact" class="py-5">
+        <div class="container">
+            <h2 class="text-center section-title mb-5">Contáctanos</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow border-0">
+                        <div class="card-body p-5 contact-form">
+                            <form id="contactForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="name" class="form-label">Nombre completo *</label>
+                                        <input type="text" class="form-control" id="name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Correo electrónico *</label>
+                                        <input type="email" class="form-control" id="email" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subject" class="form-label">Asunto *</label>
+                                    <input type="text" class="form-control" id="subject" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Mensaje *</label>
+                                    <textarea class="form-control" id="message" rows="5" required></textarea>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
+                                        <i class="fas fa-paper-plane me-2"></i>Enviar mensaje
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h4 class="text-uppercase mb-4">Logística Retail IA</h4>
+                    <p>Transformamos la logística retail mediante inteligencia artificial predictiva para maximizar eficiencia y rentabilidad.</p>
+                </div>
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h4 class="text-uppercase mb-4">Enlaces útiles</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Preguntas frecuentes</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Blog de logística</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Recursos gratuitos</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Políticas de privacidad</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h4 class="text-uppercase mb-4">Contacto</h4>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Av. Logística 456, Ciudad</p>
+                    <p><i class="fas fa-phone me-2"></i> (123) 456-7890</p>
+                    <p><i class="fas fa-envelope me-2"></i> info@logisticaretailia.com</p>
+                    <div class="mt-3">
+                        <a href="#" class="text-white me-3 social-btn facebook d-inline-flex"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3 social-btn twitter d-inline-flex"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white me-3 social-btn linkedin d-inline-flex"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="text-white social-btn instagram d-inline-flex"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 bg-light">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 Logística Retail Inteligente. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal de Inicio de Sesión -->
+    <div class="modal fade login-modal" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="login-header">
+                    <h3 class="modal-title" id="loginModalLabel">Iniciar Sesión</h3>
+                    <p class="mb-0">Accede a tu cuenta para continuar</p>
+                </div>
+                <div class="login-body">
+                    <form id="loginForm">
+                        <div id="login-error" class="alert alert-danger d-none" role="alert"></div>
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="loginEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="loginPassword" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Recordarme</label>
+                            <a href="#" class="float-end text-decoration-none">¿Olvidaste tu contraseña?</a>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Iniciar Sesión</button>
+                    </form>
+                    
+                    <div class="divider">
+                        <span>O inicia sesión con</span>
+                    </div>
+                    
+                    <div class="social-login">
+                        <a href="#" class="social-btn facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-btn google">
+                            <i class="fab fa-google"></i>
+                        </a>
+                        <a href="#" class="social-btn linkedin">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <p>¿No tienes una cuenta? <a href="#" class="text-decoration-none" id="registerLink">Regístrate ahora</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Registro -->
+    <div class="modal fade login-modal" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="login-header">
+                    <h3 class="modal-title" id="registerModalLabel">Crear Cuenta</h3>
+                    <p class="mb-0">Regístrate para acceder a todos nuestros servicios</p>
+                </div>
+                <div class="login-body">
+                    <form id="registerForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="registerFirstName" class="form-label">Nombres</label>
+                                <input type="text" class="form-control" id="registerFirstName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="registerLastName" class="form-label">Apellidos</label>
+                                <input type="text" class="form-control" id="registerLastName" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="registerEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerPassword" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="registerPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerConfirmPassword" class="form-label">Confirmar Contraseña</label>
+                            <input type="password" class="form-control" id="registerConfirmPassword" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="termsAgree" required>
+                            <label class="form-check-label" for="termsAgree">Acepto los <a href="#" class="text-decoration-none">términos y condiciones</a></label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Crear Cuenta</button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>¿Ya tienes una cuenta? <a href="#" class="text-decoration-none" id="loginBackLink">Inicia sesión</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & jQuery JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Alternar entre modales de inicio de sesión y registro
+            $("#registerLink").click(function(e) {
+                e.preventDefault();
+                $("#loginModal").modal("hide");
+                setTimeout(function() {
+                    $("#registerModal").modal("show");
+                }, 500);
+            });
+            
+            $("#loginBackLink").click(function(e) {
+                e.preventDefault();
+                $("#registerModal").modal("hide");
+                setTimeout(function() {
+                    $("#loginModal").modal("show");
+                }, 500);
+            });
+            
+            // Envío del formulario de inicio de sesión
+            $("#loginForm").submit(function(e) {
+                e.preventDefault();
+                const email = $("#loginEmail").val();
+                const password = $("#loginPassword").val();
+
+                $.ajax({
+                    url: "/login",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ email: email, password: password }),
+                    success: function(response) {
+                        // Cerrar el modal y recargar la página
+                        $("#loginModal").modal("hide");
+                        
+                        // Mostrar mensaje de éxito y opción para ir al chat
+                        if (response.redirect) {
+                            if (confirm('¡Login exitoso! ¿Deseas ir a la página de archivos ahora?')) {
+                                window.location.href = response.redirect;
+                            } else {
+                                window.location.reload(); // Recargar para mostrar usuario logueado
+                            }
+                        } else {
+                            window.location.reload();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        const errorMessage = xhr.responseJSON ? xhr.responseJSON.error : "Error de conexión";
+                        $("#login-error").text(errorMessage).removeClass("d-none");
+                    }
+                });
+            });
+            
+            // Envío del formulario de registro
+            $("#registerForm").submit(function(e) {
+                e.preventDefault();
+                
+                const firstName = $("#registerFirstName").val().trim();
+                const lastName = $("#registerLastName").val().trim();
+                const email = $("#registerEmail").val().trim();
+                const password = $("#registerPassword").val();
+                const confirmPassword = $("#registerConfirmPassword").val();
+                
+                if (password !== confirmPassword) {
+                    alert("Las contraseñas no coinciden");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/register",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ 
+                        first_name: firstName, 
+                        last_name: lastName, 
+                        email: email, 
+                        password: password 
+                    }),
+                    success: function(response) {
+                        // Cerrar el modal
+                        $("#registerModal").modal("hide");
+                        
+                        // Mostrar mensaje de éxito
+                        if (response.redirect) {
+                            if (confirm('¡Registro exitoso! ¿Deseas ir a la página de archivos ahora?')) {
+                                window.location.href = response.redirect;
+                            } else {
+                                window.location.reload(); // Recargar para mostrar usuario logueado
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        const errorMessage = xhr.responseJSON ? xhr.responseJSON.error : "Error de conexión";
+                        alert("Error en el registro: " + errorMessage);
+                    }
+                });
+            });
+            
+            // Envío del formulario de contacto
+            $("#contactForm").submit(function(e) {
+                e.preventDefault();
+                
+                const name = $("#name").val().trim();
+                const email = $("#email").val().trim();
+                const subject = $("#subject").val().trim();
+                const message = $("#message").val().trim();
+
+                // Validaciones
+                if (!name || !email || !subject || !message) {
+                    alert("Todos los campos son requeridos");
+                    return;
+                }
+
+                if (!email.includes('@') || !email.includes('.')) {
+                    alert("Por favor ingresa un email válido");
+                    return;
+                }
+
+                // Mostrar indicador de carga
+                const submitBtn = $(this).find('button[type="submit"]');
+                const originalText = submitBtn.html();
+                submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Enviando...');
+                submitBtn.prop('disabled', true);
+
+                $.ajax({
+                    url: "/api/contact",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ 
+                        name: name, 
+                        email: email, 
+                        subject: subject, 
+                        message: message 
+                    }),
+                    success: function(response) {
+                        alert(response.message);
+                        $("#contactForm")[0].reset();
+                        submitBtn.html(originalText);
+                        submitBtn.prop('disabled', false);
+                    },
+                    error: function(xhr, status, error) {
+                        const errorMessage = xhr.responseJSON ? xhr.responseJSON.error : "Error de conexión";
+                        alert("Error al enviar el mensaje: " + errorMessage);
+                        submitBtn.html(originalText);
+                        submitBtn.prop('disabled', false);
+                    }
+                });
+            });
+            
+            // Cerrar sesión
+            $("#logoutBtn").click(function(e) {
+                e.preventDefault();
+                $.post("/logout", function() {
+                    window.location.href = "/";
+                });
+            });
+
+            // Prevenir comportamiento por defecto de enlaces
+            $(document).on('click', 'a[href="/file"]', function(e) {
+                e.preventDefault();
+                window.location.href = '/file';
+            });
+        });
+    </script>
+</body>
+</html>
