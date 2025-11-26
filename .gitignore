@@ -1,9 +1,0 @@
-# Python
-__pycache__/
-*.pyc
-
-# Logs
-*.log
-
-# Jules
-jules-scratch/
