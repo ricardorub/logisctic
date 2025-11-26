@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Global - HealthMonitor{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .kpi-card {
+        transition: transform 0.3s;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .kpi-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+
+    .status-badge {
+        font-size: 0.9rem;
+        padding: 0.5em 0.8em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2"><i class="fas fa-chart-pie me-2"></i>Dashboard Global de Salud</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()">
+            <i class="fas fa-sync-alt me-1"></i> Actualizar
+        </button>
+    </div>
+</div>
+
+<!-- KPIs -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2 kpi-card border-0 bg-primary text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Total Pacientes</div>
+                        <div class="h1 mb-0 font-weight-bold">{{ stats.total_pacientes }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users kpi-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2 kpi-card border-0 bg-success text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Pacientes Estables</div>
+                        <div class="h1 mb-0 font-weight-bold">{{ stats.estados.normal }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-smile kpi-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2 kpi-card border-0 bg-warning text-dark">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">En Advertencia</div>
+                        <div class="h1 mb-0 font-weight-bold">{{ stats.estados.advertencia }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle kpi-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100 py-2 kpi-card border-0 bg-danger text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Crítico</div>
+                        <div class="h1 mb-0 font-weight-bold">{{ stats.estados.peligro }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-procedures kpi-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Gráfico de Distribución de Estados -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4 h-100">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-chart-pie me-2"></i>Distribución de
+                    Estados de Salud</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promedios Globales -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4 h-100">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-chart-bar me-2"></i>Promedios Globales
+                    (Últimas 24h)</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="small font-weight-bold">Temperatura Promedio <span class="float-end">{{
+                            stats.promedios_24h.temperatura }}°C</span></h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar bg-info" role="progressbar"
+                            style="width: {{ (stats.promedios_24h.temperatura / 50) * 100 }}%"
+                            aria-valuenow="{{ stats.promedios_24h.temperatura }}" aria-valuemin="0" aria-valuemax="50">
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h4 class="small font-weight-bold">Ritmo Cardíaco Promedio <span class="float-end">{{
+                            stats.promedios_24h.heart_rate }} bpm</span></h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar bg-danger" role="progressbar"
+                            style="width: {{ (stats.promedios_24h.heart_rate / 200) * 100 }}%"
+                            aria-valuenow="{{ stats.promedios_24h.heart_rate }}" aria-valuemin="0" aria-valuemax="200">
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h4 class="small font-weight-bold">SpO2 Promedio <span class="float-end">{{ stats.promedios_24h.spo2
+                            }}%</span></h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar bg-success" role="progressbar"
+                            style="width: {{ stats.promedios_24h.spo2 }}%"
+                            aria-valuenow="{{ stats.promedios_24h.spo2 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de Pacientes Críticos -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-danger">
+                <h6 class="m-0 font-weight-bold text-danger"><i class="fas fa-exclamation-circle me-2"></i>Pacientes que
+                    Requieren Atención</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Paciente</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if stats.pacientes_criticos %}
+                            {% for paciente in stats.pacientes_criticos %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar me-3">
+                                            {% if paciente.foto %}
+                                            <img src="{{ url_for('static', filename=paciente.foto) }}"
+                                                alt="{{ paciente.nombre }}" class="rounded-circle" width="40"
+                                                height="40">
+                                            {% else %}
+                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                                                style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ paciente.nombre }}</h6>
+                                            <small class="text-muted">ID: {{ paciente.id }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if paciente.estado == 'peligro' %}
+                                    <span class="badge bg-danger status-badge"><i class="fas fa-times-circle me-1"></i>
+                                        Crítico</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark status-badge"><i
+                                            class="fas fa-exclamation-triangle me-1"></i> Advertencia</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('monitor.index') }}?paciente_id={{ paciente.id }}"
+                                        class="btn btn-sm btn-primary">
+                                        <i class="fas fa-desktop me-1"></i> Monitorear
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-4 text-muted">
+                                    <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                                    <p class="mb-0">No hay pacientes en estado crítico o advertencia.</p>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Normal', 'Advertencia', 'Crítico'],
+                datasets: [{
+                    data: [
+                        {{ stats.estados.normal }},
+                {{ stats.estados.advertencia }}, 
+                        {{ stats.estados.peligro }}
+                    ],
+        backgroundColor: ['#1cc88a', '#f6c23e', '#e74a3b'],
+        hoverBackgroundColor: ['#17a673', '#dda20a', '#be2617'],
+        hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+        options: {
+        maintainAspectRatio: false,
+        tooltips: {
+            backgroundColor: "rgb(255,255,255)",
+            bodyFontColor: "#858796",
+            borderColor: '#dddfeb',
+            borderWidth: 1,
+            xPadding: 15,
+            yPadding: 15,
+            displayColors: false,
+            caretPadding: 10,
+        },
+        legend: {
+            display: true,
+            position: 'bottom'
+        },
+        cutout: '70%',
+    },
+        });
+    });
+</script>
+{% endblock %}

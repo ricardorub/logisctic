@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+
+{% block title %}Monitor en Tiempo Real - HealthMonitor{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .gauge-container {
+        height: 250px;
+        width: 100%;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 250px;
+        width: 100%;
+    }
+
+    .badge-value {
+        font-size: 1rem;
+        padding: 0.5em 0.7em;
+    }
+
+    .range-btn.active,
+    .stats-range-btn.active {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+
+    .status-online {
+        background-color: #28a745;
+        animation: pulse 2s infinite;
+    }
+
+    .status-offline {
+        background-color: #dc3545;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    canvas {
+        display: block;
+        max-width: 100%;
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .prediction-card {
+        transition: transform 0.3s;
+    }
+
+    .prediction-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3">
+            <i class="bi bi-heart-pulse"></i> Panel de Salud
+        </h1>
+
+        <div class="d-flex align-items-center gap-2">
+            <!-- Selector de Paciente -->
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" id="patientSelector"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user"></i>
+                    <span id="selected-patient-name">{{ paciente.nombre if paciente else 'Seleccionar Paciente'
+                        }}</span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="patientSelector">
+                    {% if pacientes %}
+                    {% for p in pacientes %}
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('monitor.monitor_patient', patient_id=p.id) }}">
+                            <i class="fas fa-user-circle me-2"></i>{{ p.nombre }}
+                            <span
+                                class="badge bg-{{ 'success' if p.estado == 'normal' else 'warning' if p.estado == 'advertencia' else 'danger' }} ms-2">
+                                {{ p.estado }}
+                            </span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                    {% else %}
+                    <li><span class="dropdown-item text-muted">No hay pacientes disponibles</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            {% if paciente and not paciente.activo %}
+            <button id="activate-btn" class="btn btn-sm btn-outline-success" data-patient-id="{{ paciente.id }}">
+                <i class="fas fa-play-circle me-1"></i> Activar Monitoreo
+            </button>
+            {% endif %}
+
+            {% if paciente and paciente.activo %}
+            <a href="{{ url_for('patients.index') }}" class="btn btn-sm btn-outline-danger"
+                title="Finalizar sesión de monitoreo">
+                <i class="fas fa-stop-circle me-1"></i> Finalizar Monitoreo
+            </a>
+            {% endif %}
+
+            <span class="badge bg-primary">MAX30100 + DS18B20</span>
+            <span id="connection-status" class="badge bg-secondary">
+                <span class="status-indicator status-offline"></span>
+                Desconectado
+            </span>
+        </div>
+    </div>
+    <hr>
+</header>
+
+<!-- Sección Monitor en Tiempo Real -->
+<div class="row">
+    <!-- Tarjeta de Temperatura -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                <span><i class="bi bi-thermometer-half text-info"></i> Temperatura</span>
+                <span id="current-temp" class="badge bg-info badge-value">-- °C</span>
+            </div>
+            <div class="card-body">
+                <div id="temp-gauge" class="gauge-container"></div>
+            </div>
+            <div class="card-footer text-muted small d-flex justify-content-between">
+                <span>Última actualización: <span id="last-update-temp">--:--:--</span></span>
+                <span id="temp-status" class="status-indicator status-offline"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta de Ritmo Cardíaco -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                <span><i class="bi bi-heart text-danger"></i> Ritmo Cardíaco</span>
+                <span id="current-heart" class="badge bg-danger badge-value">-- bpm</span>
+            </div>
+            <div class="card-body">
+                <div id="heart-gauge" class="gauge-container"></div>
+            </div>
+            <div class="card-footer text-muted small d-flex justify-content-between">
+                <span>Última actualización: <span id="last-update-heart">--:--:--</span></span>
+                <span id="heart-status" class="status-indicator status-offline"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta de SpO2 -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                <span><i class="bi bi-droplet text-success"></i> Nivel de SpO2</span>
+                <span id="current-spo2" class="badge bg-success badge-value">-- %</span>
+            </div>
+            <div class="card-body">
+                <div id="spo2-gauge" class="gauge-container"></div>
+            </div>
+            <div class="card-footer text-muted small d-flex justify-content-between">
+                <span>Última actualización: <span id="last-update-spo2">--:--:--</span></span>
+                <span id="spo2-status" class="status-indicator status-offline"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Gráfico de Temperatura -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-light">
+                <i class="bi bi-graph-up"></i> Histórico de Temperatura
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="tempChart"></canvas>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="btn-group btn-group-sm w-100">
+                    <button class="btn btn-outline-secondary range-btn active" data-range="5min">5 min</button>
+                    <button class="btn btn-outline-secondary range-btn" data-range="15min">15 min</button>
+                    <button class="btn btn-outline-secondary range-btn" data-range="30min">30 min</button>
+                    <button class="btn btn-outline-primary range-btn" data-range="all">Todo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de Ritmo Cardíaco -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-light">
+                <i class="bi bi-activity"></i> Histórico de Ritmo Cardíaco
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="heartChart"></canvas>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="btn-group btn-group-sm w-100">
+                    <button class="btn btn-outline-secondary range-btn active" data-range="5min">5 min</button>
+                    <button class="btn btn-outline-secondary range-btn" data-range="15min">15 min</button>
+                    <button class="btn btn-outline-secondary range-btn" data-range="30min">30 min</button>
+                    <button class="btn btn-outline-primary range-btn" data-range="all">Todo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de SpO2 -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-light">
+                <i class="bi bi-prescription2"></i> Histórico de SpO2
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="spo2Chart"></canvas>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="btn-group btn-group-sm w-100">
+                    <button class="btn btn-outline-secondary range-btn active" data-range="5min">5 min</button>
+                    <button class="btn btn-outline-secondary range-btn" data-range="15min">15 min</button>
+                    <button class="btn btn-outline-secondary range-btn" data-range="30min">30 min</button>
+                    <button class="btn btn-outline-primary range-btn" data-range="all">Todo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de Estadísticas y Predicciones -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-5 pb-2 mb-3 border-bottom">
+    <h2 class="h4"><i class="fas fa-chart-line me-2"></i>Análisis Histórico y Predicciones</h2>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary active stats-range-btn" data-range="7">7
+                días</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary stats-range-btn" data-range="30">30
+                días</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary stats-range-btn" data-range="90">90
+                días</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Gráfico de Temperatura (Stats) -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow prediction-card h-100">
+            <div class="card-header bg-info text-white">
+                <h6 class="m-0 font-weight-bold"><i class="fas fa-thermometer-half me-2"></i>Temperatura (Real
+                    vs Predicción)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="statsTempChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <p class="mb-1"><small class="text-muted">Valor actual:</small> <span id="statsCurrentTemp">--
+                            °C</span></p>
+                    <p class="mb-1"><small class="text-muted">Tendencia:</small> <span id="tempTrend"
+                            class="badge bg-secondary">Cargando...</span></p>
+                    <p class="mb-1"><small class="text-muted">Próximas predicciones (LSTM):</small> <span
+                            id="tempPrediction">--</span></p>
+                    <p class="mb-0 small text-muted font-italic" id="tempPredictionInfo"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de Ritmo Cardíaco (Stats) -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow prediction-card h-100">
+            <div class="card-header bg-danger text-white">
+                <h6 class="m-0 font-weight-bold"><i class="fas fa-heartbeat me-2"></i>Ritmo Cardíaco</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="statsHeartRateChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <p class="mb-1"><small class="text-muted">Valor actual:</small> <span id="statsCurrentHR">--
+                            bpm</span></p>
+                    <p class="mb-1"><small class="text-muted">Tendencia:</small> <span id="hrTrend"
+                            class="badge bg-secondary">Cargando...</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de SpO2 (Stats) -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow prediction-card h-100">
+            <div class="card-header bg-success text-white">
+                <h6 class="m-0 font-weight-bold"><i class="fas fa-lungs me-2"></i>SpO2</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="statsSpo2Chart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <p class="mb-1"><small class="text-muted">Valor actual:</small> <span id="statsCurrentSpO2">--
+                            %</span></p>
+                    <p class="mb-1"><small class="text-muted">Tendencia:</small> <span id="spo2Trend"
+                            class="badge bg-secondary">Cargando...</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Información Adicional -->
+<div class="card shadow mb-4">
+    <div class="card-header bg-white">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-info-circle me-2"></i>Interpretación de
+            los Gráficos</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <h5><i class="fas fa-thermometer-half text-info me-2"></i>Temperatura con LSTM</h5>
+                <p class="small">La línea azul muestra los valores reales. La línea roja discontinua muestra las
+                    predicciones del modelo LSTM.</p>
+            </div>
+            <div class="col-md-4">
+                <h5><i class="fas fa-brain text-purple me-2"></i>Sobre el Modelo LSTM</h5>
+                <p class="small">Red Neuronal Recurrente que analiza patrones temporales para predecir valores
+                    futuros.</p>
+            </div>
+            <div class="col-md-4">
+                <h5><i class="fas fa-sync-alt text-warning me-2"></i>Actualizaciones</h5>
+                <p class="small">Datos cada 30s. Predicciones LSTM cada 30 min.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- LÓGICA DEL MONITOR EN TIEMPO REAL ---
+    let lastDataTimestamp = 0;
+    const dataValidityTimeout = 30000; // 30 segundos
+    let tempChart, heartChart, spo2Chart;
+    let selectedPatientId = {{ paciente.id if paciente else 'null' }};
+
+    // Inicialización de gráficos gauge
+    const tempGauge = echarts.init(document.getElementById('temp-gauge'));
+    const heartGauge = echarts.init(document.getElementById('heart-gauge'));
+    const spo2Gauge = echarts.init(document.getElementById('spo2-gauge'));
+
+    // Configuración de los gauges
+    function updateGauge(chart, value, title, unit, min, max, colors) {
+        const option = {
+            series: [{
+                type: 'gauge',
+                min: min,
+                max: max,
+                axisLine: { lineStyle: { width: 30, color: colors } },
+                pointer: { itemStyle: { color: 'auto' } },
+                axisTick: { distance: -30, length: 8, lineStyle: { color: '#fff', width: 2 } },
+                splitLine: { distance: -30, length: 30, lineStyle: { color: '#fff', width: 4 } },
+                axisLabel: { color: 'auto', distance: 40, fontSize: 14 },
+                detail: { valueAnimation: true, formatter: `{value} ${unit}`, color: 'auto', fontSize: 24, fontWeight: 'bolder' },
+                title: { show: true, offsetCenter: [0, '80%'], fontSize: 16 },
+                data: [{ value: value, name: title }]
+            }]
+        };
+        chart.setOption(option);
+    }
+
+    // Función para inicializar gráficos de líneas (Realtime)
+    function initChart(ctx, label, unit, color) {
+        return new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: label,
+                    data: [],
+                    borderColor: color,
+                    backgroundColor: color.replace(')', ', 0.1)').replace('rgb', 'rgba'),
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointBackgroundColor: color,
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: false },
+                    y: { beginAtZero: false, title: { display: true, text: unit } }
+                },
+                animation: { duration: 1000 }
+            }
+        });
+    }
+
+    function updateConnectionStatus(isConnected) {
+        const statusElement = document.getElementById('connection-status');
+        const indicator = statusElement.querySelector('.status-indicator');
+        if (isConnected) {
+            statusElement.classList.replace('bg-secondary', 'bg-success');
+            statusElement.classList.replace('bg-danger', 'bg-success');
+            indicator.classList.replace('status-offline', 'status-online');
+            statusElement.innerHTML = '<span class="status-indicator status-online"></span> Conectado';
+        } else {
+            statusElement.classList.replace('bg-success', 'bg-danger');
+            statusElement.classList.replace('bg-secondary', 'bg-danger');
+            indicator.classList.replace('status-online', 'status-offline');
+            statusElement.innerHTML = '<span class="status-indicator status-offline"></span> Desconectado';
+        }
+    }
+
+    function updateSensorStatus(sensorId, isActive) {
+        const element = document.getElementById(`${sensorId}-status`);
+        if (!element) return;
+        if (isActive) {
+            element.classList.replace('status-offline', 'status-online');
+        } else {
+            element.classList.replace('status-online', 'status-offline');
+        }
+    }
+
+    function checkDataFreshness() {
+        const now = Date.now();
+        const isDataFresh = (now - lastDataTimestamp) < dataValidityTimeout;
+        updateConnectionStatus(isDataFresh);
+        updateSensorStatus('temp', isDataFresh);
+        updateSensorStatus('heart', isDataFresh);
+        updateSensorStatus('spo2', isDataFresh);
+    }
+
+    function updateChartData(data) {
+        try {
+            if (data.historico_temperatura?.length > 0) {
+                tempChart.data.labels = data.historico_temperatura.map(item => item.x);
+                tempChart.data.datasets[0].data = data.historico_temperatura.map(item => item.y);
+                tempChart.update();
+            }
+            if (data.historico_heart?.length > 0) {
+                heartChart.data.labels = data.historico_heart.map(item => item.x);
+                heartChart.data.datasets[0].data = data.historico_heart.map(item => item.y);
+                heartChart.update();
+            }
+            if (data.historico_spo2?.length > 0) {
+                spo2Chart.data.labels = data.historico_spo2.map(item => item.x);
+                spo2Chart.data.datasets[0].data = data.historico_spo2.map(item => item.y);
+                spo2Chart.update();
+            }
+        } catch (error) { console.error('Error updating charts:', error); }
+    }
+
+    function updateGaugeData(data) {
+        const timeString = data.last_update ? new Date(data.last_update).toLocaleTimeString() : '--:--:--';
+
+        if (data.temperatura_actual != null) {
+            updateGauge(tempGauge, data.temperatura_actual, 'Temperatura', '°C', -10, 50, [[0.3, '#67e0e3'], [0.7, '#37a2da'], [1, '#fd666d']]);
+            document.getElementById('current-temp').textContent = `${data.temperatura_actual.toFixed(1)} °C`;
+            document.getElementById('last-update-temp').textContent = timeString;
+            updateSensorStatus('temp', true);
+        } else {
+            updateGauge(tempGauge, 1, 'Temperatura', '°C', -10, 50, [[0.3, '#67e0e3'], [0.7, '#37a2da'], [1, '#fd666d']]);
+            document.getElementById('current-temp').textContent = '1 °C';
+            updateSensorStatus('temp', false);
+        }
+
+        if (data.heart_rate != null) {
+            updateGauge(heartGauge, data.heart_rate, 'Ritmo Cardíaco', 'bpm', 40, 180, [[0.3, '#67e0e3'], [0.7, '#37a2da'], [1, '#fd666d']]);
+            document.getElementById('current-heart').textContent = `${data.heart_rate} bpm`;
+            document.getElementById('last-update-heart').textContent = timeString;
+            updateSensorStatus('heart', true);
+        } else {
+            updateGauge(heartGauge, 1, 'Ritmo Cardíaco', 'bpm', 40, 180, [[0.3, '#67e0e3'], [0.7, '#37a2da'], [1, '#fd666d']]);
+            document.getElementById('current-heart').textContent = '1 bpm';
+            updateSensorStatus('heart', false);
+        }
+
+        if (data.spo2 != null) {
+            updateGauge(spo2Gauge, data.spo2, 'SpO2', '%', 70, 100, [[0.7, '#fd666d'], [0.9, '#37a2da'], [1, '#67e0e3']]);
+            document.getElementById('current-spo2').textContent = `${data.spo2} %`;
+            document.getElementById('last-update-spo2').textContent = timeString;
+            updateSensorStatus('spo2', true);
+        } else {
+            updateGauge(spo2Gauge, 1, 'SpO2', '%', 70, 100, [[0.7, '#fd666d'], [0.9, '#37a2da'], [1, '#67e0e3']]);
+            document.getElementById('current-spo2').textContent = '1 %';
+            updateSensorStatus('spo2', false);
+        }
+    }
+
+    function fetchData(range = '5min') {
+        let url = `/datos?range=${range}`;
+        if (selectedPatientId) url += `&paciente_id=${selectedPatientId}`;
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                lastDataTimestamp = Date.now();
+                updateGaugeData(data);
+                updateChartData(data);
+                updateConnectionStatus(true);
+            })
+            .catch(e => {
+                console.error('Error fetching data:', e);
+                updateConnectionStatus(false);
+            });
+    }
+
+    // --- LÓGICA DE ESTADÍSTICAS ---
+    let statsTempChart, statsHeartRateChart, statsSpo2Chart;
+    let currentStatsRange = '7';
+
+    function initStatsCharts() {
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'top' } },
+            scales: { x: { grid: { display: false } } }
+        };
+
+        statsTempChart = new Chart(document.getElementById('statsTempChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Datos Reales', borderColor: '#36b9cc', data: [] }, { label: 'Predicción LSTM', borderColor: '#ff6384', borderDash: [5, 5], data: [] }] },
+            options: { ...commonOptions, scales: { ...commonOptions.scales, y: { title: { display: true, text: 'Temperatura (°C)' } } } }
+        });
+
+        statsHeartRateChart = new Chart(document.getElementById('statsHeartRateChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Datos Reales', borderColor: '#4e73df', data: [] }] },
+            options: { ...commonOptions, scales: { ...commonOptions.scales, y: { title: { display: true, text: 'Ritmo Cardíaco (bpm)' } } } }
+        });
+
+        statsSpo2Chart = new Chart(document.getElementById('statsSpo2Chart').getContext('2d'), {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Datos Reales', borderColor: '#1cc88a', data: [] }] },
+            options: { ...commonOptions, scales: { ...commonOptions.scales, y: { title: { display: true, text: 'SpO2 (%)' }, min: 80, max: 100 } } }
+        });
+    }
+
+    function loadStatsData(range) {
+        let url = `/api/stats?days=${range}`;
+        if (selectedPatientId) url += `&patient_id=${selectedPatientId}`;
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                const dates = data.dias.map(d => new Date(d).toLocaleDateString());
+
+                // Update Temp
+                statsTempChart.data.labels = dates;
+                statsTempChart.data.datasets[0].data = data.temperatura;
+                // Add dummy prediction logic or use real if available
+                if (data.predictions) {
+                    // Logic to append predictions would go here
+                }
+                statsTempChart.update();
+                document.getElementById('statsCurrentTemp').textContent = data.temperatura.length ? data.temperatura[data.temperatura.length - 1].toFixed(1) + ' °C' : '--';
+
+                // Update Heart
+                statsHeartRateChart.data.labels = dates;
+                statsHeartRateChart.data.datasets[0].data = data.heart_rate;
+                statsHeartRateChart.update();
+                document.getElementById('statsCurrentHR').textContent = data.heart_rate.length ? data.heart_rate[data.heart_rate.length - 1] + ' bpm' : '--';
+
+                // Update SpO2
+                statsSpo2Chart.data.labels = dates;
+                statsSpo2Chart.data.datasets[0].data = data.spo2;
+                statsSpo2Chart.update();
+                document.getElementById('statsCurrentSpO2').textContent = data.spo2.length ? data.spo2[data.spo2.length - 1] + ' %' : '--';
+            });
+    }
+
+    // --- INICIALIZACIÓN GENERAL ---
+    document.addEventListener('DOMContentLoaded', function () {
+        // Init Realtime
+        tempChart = initChart(document.getElementById('tempChart').getContext('2d'), 'Temperatura', '°C', 'rgba(75, 192, 192, 1)');
+        heartChart = initChart(document.getElementById('heartChart').getContext('2d'), 'Ritmo Cardíaco', 'bpm', 'rgba(255, 99, 132, 1)');
+        spo2Chart = initChart(document.getElementById('spo2Chart').getContext('2d'), 'SpO2', '%', 'rgba(54, 162, 235, 1)');
+
+        // Init Stats
+        initStatsCharts();
+
+        // Event Listeners
+        document.querySelectorAll('.range-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                fetchData(this.getAttribute('data-range'));
+            });
+        });
+
+        document.querySelectorAll('.stats-range-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.stats-range-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentStatsRange = this.getAttribute('data-range');
+                loadStatsData(currentStatsRange);
+            });
+        });
+
+        const activateBtn = document.getElementById('activate-btn');
+        if (activateBtn) {
+            activateBtn.addEventListener('click', function () {
+                const patientId = this.getAttribute('data-patient-id');
+                fetch(`/api/pacientes/${patientId}/activar`, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                    .then(r => {
+                        if (r.ok) {
+                            window.location.reload();
+                        }
+                    });
+            });
+        }
+
+        // Start Loops
+        updateGaugeData({});
+        fetchData();
+        loadStatsData(currentStatsRange);
+
+        setInterval(() => {
+            const activeRange = document.querySelector('.range-btn.active').getAttribute('data-range');
+            fetchData(activeRange);
+        }, 5000);
+
+        setInterval(checkDataFreshness, 1000);
+        updateConnectionStatus(false);
+
+        // Resize handling
+        window.addEventListener('resize', function () {
+            tempGauge.resize(); heartGauge.resize(); spo2Gauge.resize();
+            tempChart.resize(); heartChart.resize(); spo2Chart.resize();
+            statsTempChart.resize(); statsHeartRateChart.resize(); statsSpo2Chart.resize();
+        });
+    });
+</script>
+{% endblock %}
