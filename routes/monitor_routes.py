@@ -53,7 +53,7 @@ def get_data():
         
     # Si no es el paciente activo, no usamos las lecturas actuales (que son globales)
     if not is_active:
-        print(f"DEBUG: Patient {patient_id} is NOT active (active is {paciente_activo.id if paciente_activo else 'None'}). Clearing current readings.")
+        print(f"DEBUG: Patient {paciente_id} is NOT active (active is {paciente_activo.id if paciente_activo else 'None'}). Clearing current readings.")
         current_readings = {
             'temperature': None,
             'heart_rate': None,
@@ -61,7 +61,7 @@ def get_data():
             'last_update': None
         }
     else:
-        print(f"DEBUG: Patient {patient_id} IS active. Using live readings.")
+        print(f"DEBUG: Patient {paciente_id} IS active. Using live readings.")
     
     data = MonitorController.format_sensor_data(records, current_readings)
     
