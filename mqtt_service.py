@@ -12,7 +12,8 @@ current_readings = {
     'temperature': None,
     'heart_rate': None,
     'spo2': None,
-    'last_update': None
+    'last_update': None,
+    'device_id': None
 }
 
 def init_mqtt(app):
