@@ -582,27 +582,57 @@
             .then(data => {
                 const dates = data.dias.map(d => new Date(d).toLocaleDateString());
 
+                // Helper to update trends
+                const updateTrend = (elementId, values) => {
+                    const el = document.getElementById(elementId);
+                    if (!values || values.length < 2) {
+                        el.innerHTML = '<span class="badge bg-secondary">Insuficientes datos</span>';
+                        return;
+                    }
+                    const last = values[values.length - 1];
+                    const prev = values[values.length - 2];
+                    let diff = last - prev;
+
+                    if (Math.abs(diff) < 0.1) {
+                        el.innerHTML = '<span class="badge bg-secondary"><i class="fas fa-minus"></i> Estable</span>';
+                    } else if (diff > 0) {
+                        el.innerHTML = '<span class="badge bg-danger"><i class="fas fa-arrow-up"></i> Subiendo</span>';
+                    } else {
+                        el.innerHTML = '<span class="badge bg-success"><i class="fas fa-arrow-down"></i> Bajando</span>';
+                    }
+                };
+
                 // Update Temp
                 statsTempChart.data.labels = dates;
                 statsTempChart.data.datasets[0].data = data.temperatura;
-                // Add dummy prediction logic or use real if available
-                if (data.predictions) {
-                    // Logic to append predictions would go here
+
+                // Prediction logic visualization
+                if (data.predictions && data.predictions.length > 0) {
+                     const nextPred = data.predictions[0].toFixed(1);
+                     document.getElementById('tempPrediction').textContent = `${nextPred} °C`;
+                     document.getElementById('tempPredictionInfo').textContent = `Predicción para la próxima hora basada en los últimos ${data.temperatura.length} puntos.`;
+                } else {
+                     document.getElementById('tempPrediction').textContent = '--';
+                     document.getElementById('tempPredictionInfo').textContent = '';
                 }
+
                 statsTempChart.update();
                 document.getElementById('statsCurrentTemp').textContent = data.temperatura.length ? data.temperatura[data.temperatura.length - 1].toFixed(1) + ' °C' : '--';
+                updateTrend('tempTrend', data.temperatura);
 
                 // Update Heart
                 statsHeartRateChart.data.labels = dates;
                 statsHeartRateChart.data.datasets[0].data = data.heart_rate;
                 statsHeartRateChart.update();
                 document.getElementById('statsCurrentHR').textContent = data.heart_rate.length ? data.heart_rate[data.heart_rate.length - 1] + ' bpm' : '--';
+                updateTrend('hrTrend', data.heart_rate);
 
                 // Update SpO2
                 statsSpo2Chart.data.labels = dates;
                 statsSpo2Chart.data.datasets[0].data = data.spo2;
                 statsSpo2Chart.update();
                 document.getElementById('statsCurrentSpO2').textContent = data.spo2.length ? data.spo2[data.spo2.length - 1] + ' %' : '--';
+                updateTrend('spo2Trend', data.spo2);
             });
     }
 
@@ -656,6 +686,11 @@
             const activeRange = document.querySelector('.range-btn.active').getAttribute('data-range');
             fetchData(activeRange);
         }, 5000);
+
+        // Add interval for Stats (every 10 seconds)
+        setInterval(() => {
+            loadStatsData(currentStatsRange);
+        }, 10000);
 
         setInterval(checkDataFreshness, 1000);
         updateConnectionStatus(false);
