@@ -144,552 +144,550 @@
                                     <h6 class="mb-0">{{ paciente.nombre }}</h6>
                                     <small class="text-muted">ID: P-{{ paciente.id }}</small>
                                     {% if paciente.activo %}
-                                                                        <span
-                                                                            class="badge bg-success ms-1">Monitoreando</span>
-                                                                        {% endif %}
-                                                                    </div>
-                                                                </div>
-                                                            </td>
+                                    <span class="badge bg-success ms-1">Monitoreando</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
 
-                                                            <td>{{ paciente.edad }} años</td>
-                                                            <td>
-                                                                {{ paciente.email or 'No disponible' }}<br>
-                                                                <small class="text-muted">{{ paciente.telefono or 'No
-                                                                    disponible' }}</small>
-                                                            </td>
-                                                            <td>{{ paciente.ultima_visita.strftime('%d/%m/%Y') if
-                                                                paciente.ultima_visita else 'N/A' }}</td>
-                                                            <td>
-                                                                <span
-                                                                    class="status-badge status-{{ paciente.estado }}"></span>
-                                                                <span class="text-capitalize">{{ paciente.estado
-                                                                    }}</span>
-                                                            </td>
-                                                            <td>
-                                                                <button class="btn btn-sm btn-outline-success me-1"
-                                                                    onclick="activarMonitoreo({{ paciente.id }})"
-                                                                    title="Monitorear en tiempo real">
-                                                                    <i class="fas fa-heartbeat"></i>
-                                                                </button>
-                                                                <button class="btn btn-sm btn-outline-warning me-1"
-                                                                    onclick="openNotificationModal({{ paciente.id }})"
-                                                                    title="Programar Notificaciones">
-                                                                    <i class="fas fa-bell"></i>
-                                                                </button>
-                                                                <button class="btn btn-sm btn-outline-info me-1"
-                                                                    onclick="viewPatient({{ paciente.id }})"
-                                                                    title="Ver detalles">
-                                                                    <i class="fas fa-eye"></i>
-                                                                </button>
-                                                                <button class="btn btn-sm btn-outline-primary"
-                                                                    onclick="editPatient({{ paciente.id }})"
-                                                                    title="Editar">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                        {% else %}
-                                                        <tr>
-                                                            <td colspan="6" class="text-center py-4">
-                                                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                                                                <p class="text-muted">No hay pacientes registrados</p>
-                                                            </td>
-                                                        </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Modal Nuevo Paciente -->
-                                    <div class="modal fade" id="newPatientModal" tabindex="-1">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header bg-primary text-white">
-                                                    <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Nuevo
-                                                        Paciente</h5>
-                                                    <button type="button" class="btn-close btn-close-white"
-                                                        data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <form id="newPatientForm">
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Nombre Completo *</label>
-                                                                <input type="text" class="form-control" name="nombre"
-                                                                    required>
-                                                            </div>
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Edad *</label>
-                                                                <input type="number" class="form-control" name="edad"
-                                                                    min="1" max="120" required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Email</label>
-                                                                <input type="email" class="form-control" name="email">
-                                                            </div>
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Teléfono</label>
-                                                                <input type="tel" class="form-control" name="telefono">
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Estado *</label>
-                                                                <select class="form-select" name="estado" required>
-                                                                    <option value="normal">Normal</option>
-                                                                    <option value="advertencia">Advertencia</option>
-                                                                    <option value="critico">Crítico</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">URL de Foto</label>
-                                                                <input type="url" class="form-control" name="foto_url"
-                                                                    placeholder="https://ejemplo.com/foto.jpg">
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Notas</label>
-                                                            <textarea class="form-control" name="notas"
-                                                                rows="3"></textarea>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Cancelar</button>
-                                                    <button type="button" class="btn btn-primary"
-                                                        onclick="saveNewPatient()">Guardar</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Modal Ver Paciente -->
-                                    <div class="modal fade" id="viewPatientModal" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header bg-info text-white">
-                                                    <h5 class="modal-title"><i class="fas fa-user me-2"></i>Detalles del
-                                                        Paciente</h5>
-                                                    <button type="button" class="btn-close btn-close-white"
-                                                        data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="text-center mb-4">
-                                                        <img id="view-foto" src="" class="rounded-circle mb-3"
-                                                            width="100" height="100" style="object-fit: cover;">
-                                                        <h4 id="view-nombre"></h4>
-                                                        <span id="view-estado" class="badge"></span>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-md-6 mb-3">
-                                                            <label class="fw-bold text-muted">Edad</label>
-                                                            <p id="view-edad"></p>
-                                                        </div>
-                                                        <div class="col-md-6 mb-3">
-                                                            <label class="fw-bold text-muted">Teléfono</label>
-                                                            <p id="view-telefono"></p>
-                                                        </div>
-                                                        <div class="col-md-12 mb-3">
-                                                            <label class="fw-bold text-muted">Email</label>
-                                                            <p id="view-email"></p>
-                                                        </div>
-                                                        <div class="col-md-12 mb-3">
-                                                            <label class="fw-bold text-muted">Notas</label>
-                                                            <p id="view-notas" class="bg-light p-2 rounded"></p>
-                                                        </div>
-                                                        <div class="col-md-12">
-                                                            <label class="fw-bold text-muted">Última Visita</label>
-                                                            <p id="view-ultima-visita"></p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Cerrar</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Modal Editar Paciente -->
-                                    <div class="modal fade" id="editPatientModal" tabindex="-1">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header bg-primary text-white">
-                                                    <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Editar
-                                                        Paciente</h5>
-                                                    <button type="button" class="btn-close btn-close-white"
-                                                        data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <form id="editPatientForm">
-                                                        <input type="hidden" id="edit-id" name="id">
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Nombre Completo *</label>
-                                                                <input type="text" class="form-control" id="edit-nombre"
-                                                                    name="nombre" required>
-                                                            </div>
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Edad *</label>
-                                                                <input type="number" class="form-control" id="edit-edad"
-                                                                    name="edad" min="1" max="120" required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Email</label>
-                                                                <input type="email" class="form-control" id="edit-email"
-                                                                    name="email">
-                                                            </div>
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Teléfono</label>
-                                                                <input type="tel" class="form-control"
-                                                                    id="edit-telefono" name="telefono">
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">Estado *</label>
-                                                                <select class="form-select" id="edit-estado"
-                                                                    name="estado" required>
-                                                                    <option value="normal">Normal</option>
-                                                                    <option value="advertencia">Advertencia</option>
-                                                                    <option value="critico">Crítico</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-md-6 mb-3">
-                                                                <label class="form-label">URL de Foto</label>
-                                                                <input type="url" class="form-control"
-                                                                    id="edit-foto-url" name="foto_url">
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Notas</label>
-                                                            <textarea class="form-control" id="edit-notas" name="notas"
-                                                                rows="3"></textarea>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Cancelar</button>
-                                                    <button type="button" class="btn btn-primary"
-                                                        onclick="updatePatient()">Guardar Cambios</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Modal Programar Notificaciones -->
-                                    <div class="modal fade" id="notificationModal" tabindex="-1">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header bg-warning text-dark">
-                                                    <h5 class="modal-title"><i class="fas fa-bell me-2"></i>Programar
-                                                        Notificaciones</h5>
-                                                    <button type="button" class="btn-close"
-                                                        data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <input type="hidden" id="notif-patient-id">
-                                                    <div class="row mb-4">
-                                                        <div class="col-md-8">
-                                                            <label class="form-label">Fecha y Hora</label>
-                                                            <input type="datetime-local" class="form-control"
-                                                                id="notif-datetime">
-                                                        </div>
-                                                        <div class="col-md-4 d-flex align-items-end">
-                                                            <button class="btn btn-primary w-100"
-                                                                onclick="scheduleNotification()">
-                                                                <i class="fas fa-plus me-1"></i> Añadir
-                                                            </button>
-                                                        </div>
-                                                    </div>
-
-                                                    <h6 class="border-bottom pb-2 mb-3">Notificaciones Programadas</h6>
-                                                    <div class="table-responsive">
-                                                        <table class="table table-sm table-hover align-middle">
-                                                            <thead class="table-light">
-                                                                <tr>
-                                                                    <th>Fecha y Hora</th>
-                                                                    <th>Estado</th>
-                                                                    <th>Acciones</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="notificationsList">
-                                                                <!-- Lista cargada dinámicamente -->
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Cerrar</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {% endblock %}
-
-                                    {% block extra_js %}
-                                    <script>
-                                        // Variables globales para los modales
-                                        let viewModal, editModal, newModal, notificationModal;
-
-                                        document.addEventListener('DOMContentLoaded', function () {
-                                            viewModal = new bootstrap.Modal(document.getElementById('viewPatientModal'));
-                                            editModal = new bootstrap.Modal(document.getElementById('editPatientModal'));
-                                            newModal = new bootstrap.Modal(document.getElementById('newPatientModal'));
-                                            notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
-                                        });
-
-                                        function activarMonitoreo(pacienteId) {
-                                            if (confirm('¿Desea activar el monitoreo en tiempo real para este paciente?')) {
-                                                fetch(`/api/pacientes/${pacienteId}/activar`, {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/json'
-                                                    }
-                                                })
-                                                    .then(response => response.json())
-                                                    .then(data => {
-                                                        if (data.message) {
-                                                            alert(data.message);
-                                                            window.location.href = "{{ url_for('monitor.index') }}";
-                                                        }
-                                                    })
-                                                    .catch(error => {
-                                                        console.error('Error:', error);
-                                                        alert('Error al activar el monitoreo');
-                                                    });
-                                            }
-                                        }
-
-                                        function saveNewPatient() {
-                                            const form = document.getElementById('newPatientForm');
-                                            if (!form.checkValidity()) {
-                                                form.reportValidity();
-                                                return;
-                                            }
-
-                                            const formData = new FormData(form);
-                                            const data = Object.fromEntries(formData.entries());
-
-                                            fetch('/api/pacientes', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                body: JSON.stringify(data)
-                                            })
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    if (data.id) {
-                                                        alert('Paciente creado exitosamente');
-                                                        location.reload();
-                                                    } else {
-                                                        alert('Error al crear paciente: ' + (data.error || 'Desconocido'));
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error('Error:', error);
-                                                    alert('Error al guardar paciente');
-                                                });
-                                        }
-
-                                        function viewPatient(id) {
-                                            fetch(`/api/pacientes/${id}`)
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    document.getElementById('view-nombre').textContent = data.nombre;
-                                                    document.getElementById('view-edad').textContent = data.edad + ' años';
-                                                    document.getElementById('view-email').textContent = data.email || 'No disponible';
-                                                    document.getElementById('view-telefono').textContent = data.telefono || 'No disponible';
-                                                    document.getElementById('view-notas').textContent = data.notas || 'Sin notas';
-                                                    document.getElementById('view-ultima-visita').textContent = data.ultima_visita ? new
-                                                        Date(data.ultima_visita).toLocaleDateString() : 'N/A';
-
-                                                    const img = document.getElementById('view-foto');
-                                                    img.src = data.foto_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nombre)}`;
-
-                                                    const badge = document.getElementById('view-estado');
-                                                    badge.textContent = data.estado.toUpperCase();
-                                                    badge.className = 'badge ' + (
-                                                        data.estado === 'normal' ? 'bg-success' :
-                                                            data.estado === 'advertencia' ? 'bg-warning text-dark' : 'bg-danger'
-                                                    );
-
-                                                    viewModal.show();
-                                                })
-                                                .catch(error => console.error('Error:', error));
-                                        }
-
-                                        function editPatient(id) {
-                                            fetch(`/api/pacientes/${id}`)
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    document.getElementById('edit-id').value = data.id;
-                                                    document.getElementById('edit-nombre').value = data.nombre;
-                                                    document.getElementById('edit-edad').value = data.edad;
-                                                    document.getElementById('edit-email').value = data.email || '';
-                                                    document.getElementById('edit-telefono').value = data.telefono || '';
-                                                    document.getElementById('edit-estado').value = data.estado;
-                                                    document.getElementById('edit-foto-url').value = data.foto_url || '';
-                                                    document.getElementById('edit-notas').value = data.notas || '';
-
-                                                    editModal.show();
-                                                })
-                                                .catch(error => console.error('Error:', error));
-                                        }
-
-                                        function updatePatient() {
-                                            const form = document.getElementById('editPatientForm');
-                                            if (!form.checkValidity()) {
-                                                form.reportValidity();
-                                                return;
-                                            }
-
-                                            const id = document.getElementById('edit-id').value;
-                                            const formData = new FormData(form);
-                                            const data = Object.fromEntries(formData.entries());
-
-                                            fetch(`/api/pacientes/${id}`, {
-                                                method: 'PUT',
-                                                headers: {
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                body: JSON.stringify(data)
-                                            })
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    if (data.message) {
-                                                        alert('Paciente actualizado exitosamente');
-                                                        location.reload();
-                                                    } else {
-                                                        alert('Error al actualizar: ' + (data.error || 'Desconocido'));
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error('Error:', error);
-                                                    alert('Error al actualizar paciente');
-                                                });
-                                        }
-
-                                        function openNotificationModal(id) {
-                                            document.getElementById('notif-patient-id').value = id;
-                                            // Set min datetime to now
-                                            const now = new Date();
-                                            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                                            document.getElementById('notif-datetime').min = now.toISOString().slice(0, 16);
-                                            document.getElementById('notif-datetime').value = '';
-
-                                            loadNotifications(id);
-                                            notificationModal.show();
-                                        }
-
-                                        function loadNotifications(patientId) {
-                                            const tbody = document.getElementById('notificationsList');
-                                            tbody.innerHTML = '<tr><td colspan="3" class="text-center">Cargando...</td></tr>';
-
-                                            fetch(`/api/pacientes/${patientId}/notificaciones`)
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    tbody.innerHTML = '';
-                                                    if (data.length === 0) {
-                                                        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No hay notificaciones programadas</td></tr>';
-                                                        return;
-                                                    }
-
-                                                    data.forEach(notif => {
-                                                        const date = new Date(notif.fecha_hora).toLocaleString();
-                                                        const statusBadge = notif.enviado ?
-                                                            '<span class="badge bg-success">Enviado</span>' :
-                                                            '<span class="badge bg-warning text-dark">Pendiente</span>';
-
-                                                        const row = `
-                    <tr>
-                        <td>${date}</td>
-                        <td>${statusBadge}</td>
+                        <td>{{ paciente.edad }} años</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteNotification(${notif.id})">
-                                <i class="fas fa-trash-alt"></i>
+                            {{ paciente.email or 'No disponible' }}<br>
+                            <small class="text-muted">{{ paciente.telefono or 'No disponible' }}</small>
+                        </td>
+                        <td>{{ paciente.ultima_visita.strftime('%d/%m/%Y') if paciente.ultima_visita else 'N/A' }}</td>
+                        <td>
+                            <select class="form-select form-select-sm"
+                                    onchange="updatePatientStatus('{{ paciente.id }}', this.value)"
+                                    style="width: auto;">
+                                <option value="normal" {% if paciente.estado == 'normal' %}selected{% endif %}>Normal</option>
+                                <option value="advertencia" {% if paciente.estado == 'advertencia' %}selected{% endif %}>Advertencia</option>
+                                <option value="critico" {% if paciente.estado == 'critico' or paciente.estado == 'peligro' %}selected{% endif %}>Crítico</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-success me-1"
+                                onclick="activarMonitoreo({{ paciente.id }})"
+                                title="Monitorear en tiempo real">
+                                <i class="fas fa-heartbeat"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning me-1"
+                                onclick="openNotificationModal({{ paciente.id }})"
+                                title="Programar Notificaciones">
+                                <i class="fas fa-bell"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info me-1"
+                                onclick="viewPatient({{ paciente.id }})"
+                                title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary"
+                                onclick="editPatient({{ paciente.id }})"
+                                title="Editar">
+                                <i class="fas fa-edit"></i>
                             </button>
                         </td>
                     </tr>
-                    `;
-                                                        tbody.innerHTML += row;
-                                                    });
-                                                })
-                                                .catch(error => {
-                                                    console.error('Error:', error);
-                                                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar notificaciones</td></tr>';
-                                                });
-                                        }
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No hay pacientes registrados</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-                                        function scheduleNotification() {
-                                            const patientId = document.getElementById('notif-patient-id').value;
-                                            const datetime = document.getElementById('notif-datetime').value;
+<!-- Modal Nuevo Paciente -->
+<div class="modal fade" id="newPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Nuevo Paciente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newPatientForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre Completo *</label>
+                            <input type="text" class="form-control" name="nombre" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Edad *</label>
+                            <input type="number" class="form-control" name="edad" min="1" max="120" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" name="telefono">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Estado *</label>
+                            <select class="form-select" name="estado" required>
+                                <option value="normal">Normal</option>
+                                <option value="advertencia">Advertencia</option>
+                                <option value="critico">Crítico</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">URL de Foto</label>
+                            <input type="url" class="form-control" name="foto_url"
+                                placeholder="https://ejemplo.com/foto.jpg">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notas</label>
+                        <textarea class="form-control" name="notas" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewPatient()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                                            if (!datetime) {
-                                                alert('Por favor seleccione fecha y hora');
-                                                return;
-                                            }
+<!-- Modal Ver Paciente -->
+<div class="modal fade" id="viewPatientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-user me-2"></i>Detalles del Paciente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <img id="view-foto" src="" class="rounded-circle mb-3" width="100" height="100"
+                        style="object-fit: cover;">
+                    <h4 id="view-nombre"></h4>
+                    <span id="view-estado" class="badge"></span>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold text-muted">Edad</label>
+                        <p id="view-edad"></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold text-muted">Teléfono</label>
+                        <p id="view-telefono"></p>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label class="fw-bold text-muted">Email</label>
+                        <p id="view-email"></p>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label class="fw-bold text-muted">Notas</label>
+                        <p id="view-notas" class="bg-light p-2 rounded"></p>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="fw-bold text-muted">Última Visita</label>
+                        <p id="view-ultima-visita"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                                            fetch(`/api/pacientes/${patientId}/notificaciones`, {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                body: JSON.stringify({
-                                                    fecha_hora: datetime
-                                                })
-                                            })
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    if (data.message) {
-                                                        // alert(data.message);
-                                                        document.getElementById('notif-datetime').value = '';
-                                                        loadNotifications(patientId);
-                                                    } else {
-                                                        alert('Error: ' + (data.error || 'Desconocido'));
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error('Error:', error);
-                                                    alert('Error al programar notificación');
-                                                });
-                                        }
+<!-- Modal Editar Paciente -->
+<div class="modal fade" id="editPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Editar Paciente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editPatientForm">
+                    <input type="hidden" id="edit-id" name="id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre Completo *</label>
+                            <input type="text" class="form-control" id="edit-nombre" name="nombre" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Edad *</label>
+                            <input type="number" class="form-control" id="edit-edad" name="edad" min="1" max="120"
+                                required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="edit-email" name="email">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="edit-telefono" name="telefono">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Estado *</label>
+                            <select class="form-select" id="edit-estado" name="estado" required>
+                                <option value="normal">Normal</option>
+                                <option value="advertencia">Advertencia</option>
+                                <option value="critico">Crítico</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">URL de Foto</label>
+                            <input type="url" class="form-control" id="edit-foto-url" name="foto_url">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notas</label>
+                        <textarea class="form-control" id="edit-notas" name="notas" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="updatePatient()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                                        function deleteNotification(id) {
-                                            if (!confirm('¿Eliminar esta notificación?')) return;
+<!-- Modal Programar Notificaciones -->
+<div class="modal fade" id="notificationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="fas fa-bell me-2"></i>Programar Notificaciones</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="notif-patient-id">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label">Fecha y Hora</label>
+                        <input type="datetime-local" class="form-control" id="notif-datetime">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="scheduleNotification()">
+                            <i class="fas fa-plus me-1"></i> Añadir
+                        </button>
+                    </div>
+                </div>
 
-                                            const patientId = document.getElementById('notif-patient-id').value;
-                                            fetch(`/api/pacientes/${patientId}/notificaciones/${id}`, {
-                                                method: 'DELETE',
-                                                headers: {
-                                                    'Content-Type': 'application/json'
-                                                }
-                                            })
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    if (data.message) {
-                                                        alert('Notificación eliminada exitosamente');
-                                                        loadNotifications(patientId); // Reload notifications after deletion
-                                                    } else {
-                                                        alert('Error: ' + (data.error || 'Desconocido'));
-                                                    }
-                                                })
-                                                .catch(error => {
-                                                    console.error('Error:', error);
-                                                    alert('Error al eliminar notificación');
-                                                });
-                                        }
-                                    </script>
-                                    {% endblock %}
+                <h6 class="border-bottom pb-2 mb-3">Notificaciones Programadas</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="notificationsList">
+                            <!-- Lista cargada dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Variables globales para los modales
+    let viewModal, editModal, newModal, notificationModal;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        viewModal = new bootstrap.Modal(document.getElementById('viewPatientModal'));
+        editModal = new bootstrap.Modal(document.getElementById('editPatientModal'));
+        newModal = new bootstrap.Modal(document.getElementById('newPatientModal'));
+        notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
+    });
+
+    function updatePatientStatus(patientId, newStatus) {
+        fetch(`/api/pacientes/${patientId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ estado: newStatus })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                response.json().then(data => {
+                    alert('Error al actualizar estado: ' + (data.error || 'Error desconocido'));
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        });
+    }
+
+    function activarMonitoreo(pacienteId) {
+        if (confirm('¿Desea activar el monitoreo en tiempo real para este paciente?')) {
+            fetch(`/api/pacientes/${pacienteId}/activar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+                        window.location.href = "{{ url_for('monitor.index') }}";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al activar el monitoreo');
+                });
+        }
+    }
+
+    function saveNewPatient() {
+        const form = document.getElementById('newPatientForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch('/api/pacientes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    alert('Paciente creado exitosamente');
+                    location.reload();
+                } else {
+                    alert('Error al crear paciente: ' + (data.error || 'Desconocido'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al guardar paciente');
+            });
+    }
+
+    function viewPatient(id) {
+        fetch(`/api/pacientes/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('view-nombre').textContent = data.nombre;
+                document.getElementById('view-edad').textContent = data.edad + ' años';
+                document.getElementById('view-email').textContent = data.email || 'No disponible';
+                document.getElementById('view-telefono').textContent = data.telefono || 'No disponible';
+                document.getElementById('view-notas').textContent = data.notas || 'Sin notas';
+                document.getElementById('view-ultima-visita').textContent = data.ultima_visita ? new
+                    Date(data.ultima_visita).toLocaleDateString() : 'N/A';
+
+                const img = document.getElementById('view-foto');
+                img.src = data.foto_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nombre)}`;
+
+                const badge = document.getElementById('view-estado');
+                badge.textContent = data.estado.toUpperCase();
+                badge.className = 'badge ' + (
+                    data.estado === 'normal' ? 'bg-success' :
+                        data.estado === 'advertencia' ? 'bg-warning text-dark' : 'bg-danger'
+                );
+
+                viewModal.show();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function editPatient(id) {
+        fetch(`/api/pacientes/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('edit-id').value = data.id;
+                document.getElementById('edit-nombre').value = data.nombre;
+                document.getElementById('edit-edad').value = data.edad;
+                document.getElementById('edit-email').value = data.email || '';
+                document.getElementById('edit-telefono').value = data.telefono || '';
+                document.getElementById('edit-estado').value = data.estado;
+                document.getElementById('edit-foto-url').value = data.foto_url || '';
+                document.getElementById('edit-notas').value = data.notas || '';
+
+                editModal.show();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function updatePatient() {
+        const form = document.getElementById('editPatientForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const id = document.getElementById('edit-id').value;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch(`/api/pacientes/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Paciente actualizado exitosamente');
+                    location.reload();
+                } else {
+                    alert('Error al actualizar: ' + (data.error || 'Desconocido'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar paciente');
+            });
+    }
+
+    function openNotificationModal(id) {
+        document.getElementById('notif-patient-id').value = id;
+        // Set min datetime to now
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('notif-datetime').min = now.toISOString().slice(0, 16);
+        document.getElementById('notif-datetime').value = '';
+
+        loadNotifications(id);
+        notificationModal.show();
+    }
+
+    function loadNotifications(patientId) {
+        const tbody = document.getElementById('notificationsList');
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center">Cargando...</td></tr>';
+
+        fetch(`/api/pacientes/${patientId}/notificaciones`)
+            .then(response => response.json())
+            .then(data => {
+                tbody.innerHTML = '';
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No hay notificaciones programadas</td></tr>';
+                    return;
+                }
+
+                data.forEach(notif => {
+                    const date = new Date(notif.fecha_hora).toLocaleString();
+                    const statusBadge = notif.enviado ?
+                        '<span class="badge bg-success">Enviado</span>' :
+                        '<span class="badge bg-warning text-dark">Pendiente</span>';
+
+                    const row = `
+<tr>
+    <td>${date}</td>
+    <td>${statusBadge}</td>
+    <td>
+        <button class="btn btn-sm btn-outline-danger" onclick="deleteNotification(${notif.id})">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </td>
+</tr>
+`;
+                    tbody.innerHTML += row;
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Error al cargar notificaciones</td></tr>';
+            });
+    }
+
+    function scheduleNotification() {
+        const patientId = document.getElementById('notif-patient-id').value;
+        const datetime = document.getElementById('notif-datetime').value;
+
+        if (!datetime) {
+            alert('Por favor seleccione fecha y hora');
+            return;
+        }
+
+        fetch(`/api/pacientes/${patientId}/notificaciones`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fecha_hora: datetime
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    // alert(data.message);
+                    document.getElementById('notif-datetime').value = '';
+                    loadNotifications(patientId);
+                } else {
+                    alert('Error: ' + (data.error || 'Desconocido'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al programar notificación');
+            });
+    }
+
+    function deleteNotification(id) {
+        if (!confirm('¿Eliminar esta notificación?')) return;
+
+        const patientId = document.getElementById('notif-patient-id').value;
+        fetch(`/api/pacientes/${patientId}/notificaciones/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Notificación eliminada exitosamente');
+                    loadNotifications(patientId); // Reload notifications after deletion
+                } else {
+                    alert('Error: ' + (data.error || 'Desconocido'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al eliminar notificación');
+            });
+    }
+</script>
+{% endblock %}
