@@ -220,7 +220,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('monitor.index') }}?paciente_id={{ paciente.id }}"
+                                    <a href="{{ url_for('monitor.monitor_patient', patient_id=paciente.id) }}"
                                         class="btn btn-sm btn-primary">
                                         <i class="fas fa-desktop me-1"></i> Monitorear
                                     </a>
