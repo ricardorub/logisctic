@@ -211,13 +211,13 @@
                                     </div>
                                 </td>
                                 <td>
-                                    {% if paciente.estado == 'peligro' %}
-                                    <span class="badge bg-danger status-badge"><i class="fas fa-times-circle me-1"></i>
-                                        Crítico</span>
-                                    {% else %}
-                                    <span class="badge bg-warning text-dark status-badge"><i
-                                            class="fas fa-exclamation-triangle me-1"></i> Advertencia</span>
-                                    {% endif %}
+                                    <select class="form-select form-select-sm status-select"
+                                            onchange="updatePatientStatus('{{ paciente.id }}', this.value)"
+                                            style="width: auto; display: inline-block;">
+                                        <option value="normal" {% if paciente.estado == 'normal' %}selected{% endif %}>Normal</option>
+                                        <option value="advertencia" {% if paciente.estado == 'advertencia' %}selected{% endif %}>Advertencia</option>
+                                        <option value="peligro" {% if paciente.estado == 'peligro' or paciente.estado == 'critico' %}selected{% endif %}>Crítico</option>
+                                    </select>
                                 </td>
                                 <td>
                                     <a href="{{ url_for('monitor.monitor_patient', patient_id=paciente.id) }}"
@@ -246,6 +246,30 @@
 
 {% block extra_js %}
 <script>
+    function updatePatientStatus(patientId, newStatus) {
+        fetch(`/api/pacientes/${patientId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ estado: newStatus })
+        })
+        .then(response => {
+            if (response.ok) {
+                // Recargar para actualizar contadores y listas
+                window.location.reload();
+            } else {
+                response.json().then(data => {
+                    alert('Error al actualizar estado: ' + (data.error || 'Error desconocido'));
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const ctx = document.getElementById('statusChart').getContext('2d');
         new Chart(ctx, {
