@@ -88,32 +88,15 @@
         </h1>
 
         <div class="d-flex align-items-center gap-2">
-            <!-- Selector de Paciente -->
-            <div class="dropdown">
-                <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" id="patientSelector"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-user"></i>
-                    <span id="selected-patient-name">{{ paciente.nombre if paciente else 'Seleccionar Paciente'
-                        }}</span>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="patientSelector">
-                    {% if pacientes %}
-                    {% for p in pacientes %}
-                    <li>
-                        <a class="dropdown-item" href="{{ url_for('monitor.monitor_patient', patient_id=p.id) }}">
-                            <i class="fas fa-user-circle me-2"></i>{{ p.nombre }}
-                            <span
-                                class="badge bg-{{ 'success' if p.estado == 'normal' else 'warning' if p.estado == 'advertencia' else 'danger' }} ms-2">
-                                {{ p.estado }}
-                            </span>
-                        </a>
-                    </li>
-                    {% endfor %}
-                    {% else %}
-                    <li><span class="dropdown-item text-muted">No hay pacientes disponibles</span></li>
-                    {% endif %}
-                </ul>
+            <!-- Patient Name Display -->
+            {% if paciente %}
+            <div class="d-flex align-items-center text-info border border-info rounded px-3 py-1 bg-light">
+                <i class="fas fa-user me-2"></i>
+                <h5 class="m-0">{{ paciente.nombre }}</h5>
             </div>
+            {% else %}
+            <span class="text-muted">Ningún paciente seleccionado</span>
+            {% endif %}
 
             {% if paciente and not paciente.activo %}
             <button id="activate-btn" class="btn btn-sm btn-outline-success" data-patient-id="{{ paciente.id }}">
@@ -462,9 +445,13 @@
         const now = Date.now();
         const isDataFresh = (now - lastDataTimestamp) < dataValidityTimeout;
         updateConnectionStatus(isDataFresh);
-        updateSensorStatus('temp', isDataFresh);
-        updateSensorStatus('heart', isDataFresh);
-        updateSensorStatus('spo2', isDataFresh);
+        // Only update sensor status if we are offline or data is stale
+        if (!isDataFresh) {
+            updateSensorStatus('temp', false);
+            updateSensorStatus('heart', false);
+            updateSensorStatus('spo2', false);
+        }
+        // If isDataFresh is true, individual sensor status is handled by updateGaugeData based on value validity
     }
 
     function updateChartData(data) {
@@ -582,27 +569,57 @@
             .then(data => {
                 const dates = data.dias.map(d => new Date(d).toLocaleDateString());
 
+                // Helper to update trends
+                const updateTrend = (elementId, values) => {
+                    const el = document.getElementById(elementId);
+                    if (!values || values.length < 2) {
+                        el.innerHTML = '<span class="badge bg-secondary">Insuficientes datos</span>';
+                        return;
+                    }
+                    const last = values[values.length - 1];
+                    const prev = values[values.length - 2];
+                    let diff = last - prev;
+                    
+                    if (Math.abs(diff) < 0.1) {
+                        el.innerHTML = '<span class="badge bg-secondary"><i class="fas fa-minus"></i> Estable</span>';
+                    } else if (diff > 0) {
+                        el.innerHTML = '<span class="badge bg-danger"><i class="fas fa-arrow-up"></i> Subiendo</span>';
+                    } else {
+                        el.innerHTML = '<span class="badge bg-success"><i class="fas fa-arrow-down"></i> Bajando</span>';
+                    }
+                };
+
                 // Update Temp
                 statsTempChart.data.labels = dates;
                 statsTempChart.data.datasets[0].data = data.temperatura;
-                // Add dummy prediction logic or use real if available
-                if (data.predictions) {
-                    // Logic to append predictions would go here
+                
+                // Prediction logic visualization
+                if (data.predictions && data.predictions.length > 0) {
+                     const nextPred = data.predictions[0].toFixed(1);
+                     document.getElementById('tempPrediction').textContent = `${nextPred} °C`;
+                     document.getElementById('tempPredictionInfo').textContent = `Predicción para la próxima hora basada en los últimos ${data.temperatura.length} puntos.`;
+                } else {
+                     document.getElementById('tempPrediction').textContent = '--';
+                     document.getElementById('tempPredictionInfo').textContent = '';
                 }
+
                 statsTempChart.update();
                 document.getElementById('statsCurrentTemp').textContent = data.temperatura.length ? data.temperatura[data.temperatura.length - 1].toFixed(1) + ' °C' : '--';
+                updateTrend('tempTrend', data.temperatura);
 
                 // Update Heart
                 statsHeartRateChart.data.labels = dates;
                 statsHeartRateChart.data.datasets[0].data = data.heart_rate;
                 statsHeartRateChart.update();
                 document.getElementById('statsCurrentHR').textContent = data.heart_rate.length ? data.heart_rate[data.heart_rate.length - 1] + ' bpm' : '--';
+                updateTrend('hrTrend', data.heart_rate);
 
                 // Update SpO2
                 statsSpo2Chart.data.labels = dates;
                 statsSpo2Chart.data.datasets[0].data = data.spo2;
                 statsSpo2Chart.update();
                 document.getElementById('statsCurrentSpO2').textContent = data.spo2.length ? data.spo2[data.spo2.length - 1] + ' %' : '--';
+                updateTrend('spo2Trend', data.spo2);
             });
     }
 
@@ -656,6 +673,11 @@
             const activeRange = document.querySelector('.range-btn.active').getAttribute('data-range');
             fetchData(activeRange);
         }, 5000);
+
+        // Add interval for Stats (every 10 seconds)
+        setInterval(() => {
+            loadStatsData(currentStatsRange);
+        }, 10000);
 
         setInterval(checkDataFreshness, 1000);
         updateConnectionStatus(false);
