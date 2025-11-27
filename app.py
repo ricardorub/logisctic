@@ -39,7 +39,7 @@ def create_app(config_name='default'):
         
     # Crear tablas si no existen e inicializar usuario admin
     with app.app_context():
-        db.create_all()
+        # db.create_all()
         
         # Crear usuario admin si no existe
         if not Usuario.query.filter_by(email='admin@healthmonitor.com').first():
